@@ -35,7 +35,7 @@ const S = {
   btn: { display: "block", width: "100%", textAlign: "center" as const, background: "#0056b3", color: "#fff", padding: "14px 0", borderRadius: 50, fontSize: 14, fontWeight: 600, border: "none", cursor: "pointer", textDecoration: "none" },
   btnOutline: { display: "block", width: "100%", textAlign: "center" as const, background: "transparent", color: "#0056b3", padding: "12px 0", borderRadius: 50, fontSize: 13, fontWeight: 600, border: "2px solid #0056b3", cursor: "pointer", marginTop: 10 },
   foot: { textAlign: "center" as const, padding: "0 36px 28px", fontSize: 11, color: "#9ca3af", lineHeight: 1.7 },
-  badge: (bg: string) => ({ display: "inline-block", background: bg, color: "#fff", padding: "4px 16px", borderRadius: 50, fontSize: 11, fontWeight: 600, marginBottom: 14 }),
+  badge: (bg: string) => ({ display: "inline-block", background: `linear-gradient(135deg, ${bg}, ${bg} 60%, #d4a017)`, color: "#fff", padding: "3px 10px", borderRadius: 50, fontSize: 10, fontWeight: 600, marginBottom: 14, letterSpacing: 0.5 }),
   accent: { color: "#0056b3", fontWeight: 700 as const },
   gold: { color: "#d4a017", fontWeight: 700 as const },
   hero: (bg: string) => ({ background: bg, padding: "28px 36px 0", textAlign: "center" as const }),
