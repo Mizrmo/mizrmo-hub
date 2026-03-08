@@ -15,6 +15,7 @@ import {
   Mail,
   Menu,
   X,
+  Settings,
 } from "lucide-react";
 
 const navItems = [
