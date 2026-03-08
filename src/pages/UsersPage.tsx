@@ -1,4 +1,5 @@
 import { Users, UserCheck, Car, DollarSign, Eye, Pencil, ChevronLeft, ChevronRight } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import DashboardHeader from "@/components/DashboardHeader";
 import StatsCard from "@/components/StatsCard";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
