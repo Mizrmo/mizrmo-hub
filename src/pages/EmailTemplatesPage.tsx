@@ -1,375 +1,355 @@
 import { useState } from "react";
 import DashboardHeader from "@/components/DashboardHeader";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import emailCarRide from "@/assets/email-car-ride.png";
+import emailWelcome from "@/assets/email-welcome.png";
+import emailRating from "@/assets/email-rating.png";
+import emailPayment from "@/assets/email-payment.png";
+import emailPromo from "@/assets/email-promo.png";
+import emailSafety from "@/assets/email-safety.png";
+import emailBooking from "@/assets/email-booking.png";
+import emailLoyalty from "@/assets/email-loyalty.png";
 
-const emailStyles = {
-  wrapper: {
-    fontFamily: "'Inter', Arial, sans-serif",
-    maxWidth: 560,
-    margin: "0 auto",
-    background: "white",
-    borderRadius: 16,
-    overflow: "hidden" as const,
-    boxShadow: "0 4px 24px rgba(0,0,0,0.08)",
-  },
-  header: {
-    background: "hsl(210, 100%, 35%)",
-    padding: "32px 40px",
-    textAlign: "center" as const,
-  },
-  logo: {
-    fontSize: 22,
-    fontWeight: 800,
-    color: "white",
-    letterSpacing: "-0.5px",
-  },
-  body: {
-    padding: "36px 40px 40px",
-  },
-  h1: {
-    fontSize: 22,
-    fontWeight: 700,
-    color: "hsl(215, 25%, 15%)",
-    margin: "0 0 8px",
-  },
-  subtitle: {
-    fontSize: 14,
-    color: "hsl(215, 10%, 50%)",
-    margin: "0 0 24px",
-    lineHeight: 1.6,
-  },
-  infoBox: {
-    background: "hsl(210, 20%, 98%)",
-    borderRadius: 12,
-    padding: "20px 24px",
-    marginBottom: 24,
-  },
-  infoRow: {
-    display: "flex",
-    justifyContent: "space-between",
-    padding: "8px 0",
-    fontSize: 13,
-    color: "hsl(215, 25%, 15%)",
-  },
-  infoLabel: {
-    color: "hsl(215, 10%, 50%)",
-    fontWeight: 500,
-  },
-  infoValue: {
-    fontWeight: 600,
-  },
-  button: {
-    display: "inline-block",
-    background: "hsl(210, 100%, 35%)",
-    color: "white",
-    padding: "14px 32px",
-    borderRadius: 50,
-    fontSize: 14,
-    fontWeight: 600,
-    textDecoration: "none",
-    border: "none",
-    cursor: "pointer",
-    textAlign: "center" as const,
-    width: "100%",
-  },
-  divider: {
-    height: 1,
-    background: "hsl(214, 20%, 90%)",
-    margin: "24px 0",
-    border: "none",
-  },
-  footer: {
-    textAlign: "center" as const,
-    padding: "0 40px 32px",
-    fontSize: 11,
-    color: "hsl(215, 10%, 50%)",
-    lineHeight: 1.7,
-  },
-  starRow: {
-    display: "flex",
-    justifyContent: "center",
-    gap: 8,
-    margin: "16px 0",
-  },
-  star: {
-    width: 36,
-    height: 36,
-    borderRadius: "50%",
-    border: "2px solid hsl(45, 100%, 55%)",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    fontSize: 18,
-    cursor: "pointer",
-    background: "transparent",
-    color: "hsl(45, 100%, 55%)",
-  },
-  starFilled: {
-    background: "hsl(45, 100%, 55%)",
-    color: "white",
-  },
-  badge: {
-    display: "inline-block",
-    background: "hsl(142, 71%, 45%)",
-    color: "white",
-    padding: "4px 14px",
-    borderRadius: 50,
-    fontSize: 12,
-    fontWeight: 600,
-    marginBottom: 16,
-  },
-  promoCode: {
-    background: "hsl(210, 20%, 98%)",
-    border: "2px dashed hsl(210, 100%, 35%)",
-    borderRadius: 12,
-    padding: "16px 24px",
-    textAlign: "center" as const,
-    marginBottom: 24,
-  },
-  promoText: {
-    fontSize: 24,
-    fontWeight: 800,
-    color: "hsl(210, 100%, 35%)",
-    letterSpacing: 3,
-  },
+const templates = [
+  { key: "ride", label: "Ride Complete" },
+  { key: "welcome", label: "Welcome" },
+  { key: "payment", label: "Payment" },
+  { key: "rate", label: "Rate Driver" },
+  { key: "promo", label: "Promo" },
+  { key: "safety", label: "Safety" },
+  { key: "booking", label: "Booking" },
+  { key: "loyalty", label: "Loyalty" },
+];
+
+/* ── Shared inline styles ─────────────────────────────────── */
+const S = {
+  mail: { fontFamily: "'Inter', Arial, sans-serif", maxWidth: 520, margin: "0 auto", background: "#fff", borderRadius: 20, overflow: "hidden" as const, boxShadow: "0 8px 40px rgba(0,56,179,0.10)" },
+  heroImg: { width: "100%", height: 200, objectFit: "cover" as const },
+  body: { padding: "28px 36px 36px" },
+  h1: { fontSize: 21, fontWeight: 700, color: "#0e1b2e", margin: "0 0 6px" },
+  sub: { fontSize: 13, color: "#6b7280", margin: "0 0 20px", lineHeight: 1.65 },
+  box: { background: "#f4f7fb", borderRadius: 14, padding: "18px 22px", marginBottom: 22 },
+  row: { display: "flex", justifyContent: "space-between", padding: "7px 0", fontSize: 13 },
+  lbl: { color: "#6b7280", fontWeight: 500 as const },
+  val: { color: "#0e1b2e", fontWeight: 600 as const },
+  hr: { height: 1, background: "#e5e7eb", margin: "0", border: "none" },
+  btn: { display: "block", width: "100%", textAlign: "center" as const, background: "#0056b3", color: "#fff", padding: "14px 0", borderRadius: 50, fontSize: 14, fontWeight: 600, border: "none", cursor: "pointer", textDecoration: "none" },
+  btnOutline: { display: "block", width: "100%", textAlign: "center" as const, background: "transparent", color: "#0056b3", padding: "12px 0", borderRadius: 50, fontSize: 13, fontWeight: 600, border: "2px solid #0056b3", cursor: "pointer", marginTop: 10 },
+  foot: { textAlign: "center" as const, padding: "0 36px 28px", fontSize: 11, color: "#9ca3af", lineHeight: 1.7 },
+  badge: (bg: string) => ({ display: "inline-block", background: bg, color: "#fff", padding: "4px 16px", borderRadius: 50, fontSize: 11, fontWeight: 600, marginBottom: 14 }),
+  accent: { color: "#0056b3", fontWeight: 700 as const },
+  gold: { color: "#d4a017", fontWeight: 700 as const },
+  hero: (bg: string) => ({ background: bg, padding: "28px 36px 0", textAlign: "center" as const }),
+  starRow: { display: "flex", justifyContent: "center", gap: 6, margin: "14px 0" },
+  star: (filled: boolean) => ({ width: 38, height: 38, borderRadius: "50%", display: "inline-flex", alignItems: "center", justifyContent: "center", fontSize: 20, border: "2px solid #d4a017", background: filled ? "#d4a017" : "transparent", color: filled ? "#fff" : "#d4a017", cursor: "pointer" }),
+  promoCode: { background: "#f4f7fb", border: "2px dashed #0056b3", borderRadius: 14, padding: "14px 24px", textAlign: "center" as const, marginBottom: 22 },
+  promoText: { fontSize: 26, fontWeight: 800, color: "#0056b3", letterSpacing: 4 },
+  timeline: { position: "relative" as const, paddingLeft: 24, marginBottom: 22 },
+  dot: (color: string) => ({ width: 10, height: 10, borderRadius: "50%", background: color, position: "absolute" as const, left: 0, top: 5 }),
+  line: { position: "absolute" as const, left: 4, top: 18, width: 2, height: "calc(100% - 18px)", background: "#e5e7eb" },
 };
 
+const Logo = () => (
+  <p style={{ fontSize: 20, fontWeight: 800, color: "#fff", margin: 0, letterSpacing: -0.5 }}>
+    Mizrmo
+  </p>
+);
+
+const Footer = ({ extra }: { extra?: string }) => (
+  <div style={S.foot}>
+    {extra && <p style={{ marginBottom: 4 }}>{extra}</p>}
+    <p>© 2026 Mizrmo Technologies Ltd. All rights reserved.</p>
+    <p style={{ fontSize: 10, marginTop: 4 }}>
+      <a href="#" style={{ color: "#6b7280", textDecoration: "underline" }}>Unsubscribe</a>
+      {" · "}
+      <a href="#" style={{ color: "#6b7280", textDecoration: "underline" }}>Privacy Policy</a>
+      {" · "}
+      <a href="#" style={{ color: "#6b7280", textDecoration: "underline" }}>Help Center</a>
+    </p>
+  </div>
+);
+
+const InfoRow = ({ label, value, highlight }: { label: string; value: string; highlight?: boolean }) => (
+  <>
+    <div style={S.row}>
+      <span style={S.lbl}>{label}</span>
+      <span style={{ ...S.val, ...(highlight ? { fontSize: 15, color: "#0056b3" } : {}) }}>{value}</span>
+    </div>
+    <hr style={S.hr} />
+  </>
+);
+
+/* ── Templates ───────────────────────────────────────────── */
+
 const RideCompletedEmail = () => (
-  <div style={emailStyles.wrapper}>
-    <div style={emailStyles.header}>
-      <p style={emailStyles.logo}>Mizrmo</p>
+  <div style={S.mail}>
+    <div style={{ ...S.hero("#0056b3"), paddingBottom: 0 }}>
+      <Logo />
+      <img src={emailCarRide} alt="ride" style={{ width: "80%", marginTop: 16 }} />
     </div>
-    <div style={emailStyles.body}>
-      <h1 style={emailStyles.h1}>Ride Completed! 🎉</h1>
-      <p style={emailStyles.subtitle}>
-        Thanks for riding with Mizrmo, Daniel! Here's a summary of your trip.
-      </p>
-      <div style={emailStyles.infoBox}>
-        <div style={emailStyles.infoRow}>
-          <span style={emailStyles.infoLabel}>Pickup</span>
-          <span style={emailStyles.infoValue}>Tema Station</span>
-        </div>
-        <hr style={emailStyles.divider} />
-        <div style={emailStyles.infoRow}>
-          <span style={emailStyles.infoLabel}>Drop-off</span>
-          <span style={emailStyles.infoValue}>Kumasi Adum</span>
-        </div>
-        <hr style={emailStyles.divider} />
-        <div style={emailStyles.infoRow}>
-          <span style={emailStyles.infoLabel}>Driver</span>
-          <span style={emailStyles.infoValue}>Kwame Mensah</span>
-        </div>
-        <hr style={emailStyles.divider} />
-        <div style={emailStyles.infoRow}>
-          <span style={emailStyles.infoLabel}>Distance</span>
-          <span style={emailStyles.infoValue}>245 km</span>
-        </div>
-        <hr style={emailStyles.divider} />
-        <div style={emailStyles.infoRow}>
-          <span style={emailStyles.infoLabel}>Duration</span>
-          <span style={emailStyles.infoValue}>3h 20m</span>
-        </div>
-        <hr style={emailStyles.divider} />
-        <div style={emailStyles.infoRow}>
-          <span style={emailStyles.infoLabel}>Fare</span>
-          <span style={{ ...emailStyles.infoValue, fontSize: 16, color: "hsl(210, 100%, 35%)" }}>Gh₵125.00</span>
-        </div>
+    <div style={S.body}>
+      <span style={S.badge("#16a34a")}>Trip Complete</span>
+      <h1 style={S.h1}>Your ride is done! 🎉</h1>
+      <p style={S.sub}>Thanks for riding with Mizrmo, Daniel. Here's your trip summary.</p>
+      <div style={S.box}>
+        <InfoRow label="Pickup" value="Tema Station" />
+        <InfoRow label="Drop-off" value="Kumasi Adum" />
+        <InfoRow label="Driver" value="Kwame Mensah" />
+        <InfoRow label="Distance" value="245 km" />
+        <InfoRow label="Duration" value="3h 20m" />
+        <InfoRow label="Fare" value="Gh₵125.00" highlight />
       </div>
-      <button style={emailStyles.button}>View Trip Details</button>
+      <p style={{ fontSize: 12, color: "#6b7280", textAlign: "center", marginBottom: 18 }}>
+        You earned <span style={S.gold}>12 Miz Miles</span> on this ride!
+      </p>
+      <button style={S.btn}>View Trip Details</button>
+      <button style={S.btnOutline}>Report an Issue</button>
     </div>
-    <div style={emailStyles.footer}>
-      <p>You earned <strong>12 Miz Miles</strong> on this ride!</p>
-      <p>© 2026 Mizrmo. All rights reserved.</p>
-    </div>
+    <Footer extra="Rate your driver to help the community!" />
   </div>
 );
 
 const WelcomeEmail = () => (
-  <div style={emailStyles.wrapper}>
-    <div style={{ ...emailStyles.header, padding: "40px 40px 32px" }}>
-      <p style={emailStyles.logo}>Mizrmo</p>
-      <p style={{ color: "white", fontSize: 13, opacity: 0.85, marginTop: 8 }}>Your journey starts here</p>
+  <div style={S.mail}>
+    <div style={{ ...S.hero("linear-gradient(135deg, #0056b3, #003d80)"), paddingBottom: 0 }}>
+      <Logo />
+      <p style={{ color: "rgba(255,255,255,0.8)", fontSize: 12, margin: "4px 0 0" }}>Your journey starts here</p>
+      <img src={emailWelcome} alt="welcome" style={{ width: "65%", marginTop: 14 }} />
     </div>
-    <div style={emailStyles.body}>
-      <h1 style={emailStyles.h1}>Welcome aboard, Daniel! 👋</h1>
-      <p style={emailStyles.subtitle}>
-        We're excited to have you join Mizrmo — the smartest way to travel across Ghana. Here's what you can do next:
-      </p>
-      <div style={emailStyles.infoBox}>
-        <div style={{ padding: "8px 0", fontSize: 13, color: "hsl(215, 25%, 15%)" }}>
-          <strong>🚗 Book your first ride</strong>
-          <p style={{ margin: "4px 0 0", color: "hsl(215, 10%, 50%)", fontSize: 12 }}>Enter your destination and get matched instantly</p>
+    <div style={S.body}>
+      <h1 style={S.h1}>Welcome aboard, Daniel! 👋</h1>
+      <p style={S.sub}>We're thrilled to have you on Mizrmo — Ghana's smartest way to travel. Here's how to get started:</p>
+      <div style={S.box}>
+        <div style={{ padding: "10px 0" }}>
+          <strong style={{ fontSize: 13, color: "#0e1b2e" }}>🚗 Book your first ride</strong>
+          <p style={{ margin: "3px 0 0", fontSize: 12, color: "#6b7280" }}>Enter a destination and match with a driver instantly</p>
         </div>
-        <hr style={emailStyles.divider} />
-        <div style={{ padding: "8px 0", fontSize: 13, color: "hsl(215, 25%, 15%)" }}>
-          <strong>💰 Set up your wallet</strong>
-          <p style={{ margin: "4px 0 0", color: "hsl(215, 10%, 50%)", fontSize: 12 }}>Add a payment method for seamless transactions</p>
+        <hr style={S.hr} />
+        <div style={{ padding: "10px 0" }}>
+          <strong style={{ fontSize: 13, color: "#0e1b2e" }}>💰 Set up your wallet</strong>
+          <p style={{ margin: "3px 0 0", fontSize: 12, color: "#6b7280" }}>Add Mobile Money or card for seamless payments</p>
         </div>
-        <hr style={emailStyles.divider} />
-        <div style={{ padding: "8px 0", fontSize: 13, color: "hsl(215, 25%, 15%)" }}>
-          <strong>⭐ Earn Miz Miles</strong>
-          <p style={{ margin: "4px 0 0", color: "hsl(215, 10%, 50%)", fontSize: 12 }}>Get rewarded for every ride you take</p>
+        <hr style={S.hr} />
+        <div style={{ padding: "10px 0" }}>
+          <strong style={{ fontSize: 13, color: "#0e1b2e" }}>⭐ Earn Miz Miles</strong>
+          <p style={{ margin: "3px 0 0", fontSize: 12, color: "#6b7280" }}>Every ride earns you loyalty points for discounts</p>
         </div>
       </div>
-      <button style={emailStyles.button}>Start Riding</button>
+      <button style={S.btn}>Start Riding</button>
     </div>
-    <div style={emailStyles.footer}>
-      <p>Need help? Reply to this email or contact support@mizrmo.com</p>
-      <p>© 2026 Mizrmo. All rights reserved.</p>
-    </div>
+    <Footer extra="Questions? Reply to this email anytime." />
   </div>
 );
 
 const PaymentReceiptEmail = () => (
-  <div style={emailStyles.wrapper}>
-    <div style={emailStyles.header}>
-      <p style={emailStyles.logo}>Mizrmo</p>
+  <div style={S.mail}>
+    <div style={{ ...S.hero("#0056b3"), paddingBottom: 0 }}>
+      <Logo />
+      <img src={emailPayment} alt="payment" style={{ width: "60%", marginTop: 12 }} />
     </div>
-    <div style={emailStyles.body}>
-      <div style={{ textAlign: "center", marginBottom: 24 }}>
-        <span style={emailStyles.badge}>Payment Successful</span>
+    <div style={S.body}>
+      <div style={{ textAlign: "center", marginBottom: 20 }}>
+        <span style={S.badge("#16a34a")}>Payment Successful</span>
+        <p style={{ fontSize: 38, fontWeight: 800, color: "#0056b3", margin: "8px 0 2px" }}>Gh₵500.00</p>
+        <p style={{ fontSize: 11, color: "#9ca3af" }}>Transaction ID: mzpymnt_120</p>
       </div>
-      <h1 style={{ ...emailStyles.h1, textAlign: "center" }}>Payment Receipt</h1>
-      <p style={{ ...emailStyles.subtitle, textAlign: "center" }}>
-        Your payment has been processed successfully.
-      </p>
-      <div style={{ textAlign: "center", margin: "24px 0" }}>
-        <p style={{ fontSize: 36, fontWeight: 800, color: "hsl(210, 100%, 35%)", margin: 0 }}>Gh₵500.00</p>
-        <p style={{ fontSize: 12, color: "hsl(215, 10%, 50%)", marginTop: 4 }}>Transaction ID: mzpymnt_120</p>
+      <div style={S.box}>
+        <InfoRow label="Date" value="Sep 30, 2030" />
+        <InfoRow label="Type" value="Transport Payment" />
+        <InfoRow label="Route" value="Tema → Kumasi" />
+        <InfoRow label="Method" value="MTN Mobile Money" />
+        <InfoRow label="Driver" value="Kwame Mensah" />
       </div>
-      <div style={emailStyles.infoBox}>
-        <div style={emailStyles.infoRow}>
-          <span style={emailStyles.infoLabel}>Date</span>
-          <span style={emailStyles.infoValue}>Sep 30, 2030</span>
-        </div>
-        <hr style={emailStyles.divider} />
-        <div style={emailStyles.infoRow}>
-          <span style={emailStyles.infoLabel}>Type</span>
-          <span style={emailStyles.infoValue}>Transport Payment</span>
-        </div>
-        <hr style={emailStyles.divider} />
-        <div style={emailStyles.infoRow}>
-          <span style={emailStyles.infoLabel}>Route</span>
-          <span style={emailStyles.infoValue}>Tema → Kumasi</span>
-        </div>
-        <hr style={emailStyles.divider} />
-        <div style={emailStyles.infoRow}>
-          <span style={emailStyles.infoLabel}>Method</span>
-          <span style={emailStyles.infoValue}>Mobile Money</span>
-        </div>
-      </div>
-      <button style={emailStyles.button}>Download Receipt</button>
+      <button style={S.btn}>Download Receipt</button>
+      <button style={S.btnOutline}>View All Transactions</button>
     </div>
-    <div style={emailStyles.footer}>
-      <p>This is an automated receipt. Keep it for your records.</p>
-      <p>© 2026 Mizrmo. All rights reserved.</p>
-    </div>
+    <Footer extra="Keep this email as your payment record." />
   </div>
 );
 
 const RateDriverEmail = () => (
-  <div style={emailStyles.wrapper}>
-    <div style={emailStyles.header}>
-      <p style={emailStyles.logo}>Mizrmo</p>
+  <div style={S.mail}>
+    <div style={{ ...S.hero("#0056b3"), paddingBottom: 0 }}>
+      <Logo />
+      <img src={emailRating} alt="rating" style={{ width: "45%", marginTop: 12 }} />
     </div>
-    <div style={emailStyles.body}>
-      <h1 style={{ ...emailStyles.h1, textAlign: "center" }}>How was your ride? 🚘</h1>
-      <p style={{ ...emailStyles.subtitle, textAlign: "center" }}>
-        Help us improve by rating your experience with <strong>Kwame Mensah</strong>.
-      </p>
-      <div style={{ textAlign: "center", marginBottom: 24 }}>
-        <div style={{ width: 72, height: 72, borderRadius: "50%", background: "hsl(210, 100%, 35%)", display: "inline-flex", alignItems: "center", justifyContent: "center", color: "white", fontSize: 28, fontWeight: 700 }}>
-          KM
-        </div>
-        <p style={{ fontSize: 16, fontWeight: 600, color: "hsl(215, 25%, 15%)", marginTop: 12 }}>Kwame Mensah</p>
-        <p style={{ fontSize: 12, color: "hsl(215, 10%, 50%)" }}>Tema → Kumasi • Sep 30</p>
+    <div style={S.body}>
+      <h1 style={{ ...S.h1, textAlign: "center" }}>How was your ride? 🚘</h1>
+      <p style={{ ...S.sub, textAlign: "center" }}>Your feedback helps us keep Mizrmo safe & reliable.</p>
+      <div style={{ textAlign: "center", marginBottom: 20 }}>
+        <div style={{ width: 64, height: 64, borderRadius: "50%", background: "#0056b3", display: "inline-flex", alignItems: "center", justifyContent: "center", color: "#fff", fontSize: 24, fontWeight: 700 }}>KM</div>
+        <p style={{ fontSize: 15, fontWeight: 600, color: "#0e1b2e", marginTop: 10 }}>Kwame Mensah</p>
+        <p style={{ fontSize: 12, color: "#6b7280" }}>Tema → Kumasi · Sep 30</p>
       </div>
-      <div style={emailStyles.starRow}>
-        {[1, 2, 3, 4, 5].map((s) => (
-          <div key={s} style={{ ...emailStyles.star, ...(s <= 4 ? emailStyles.starFilled : {}) }}>
-            ★
-          </div>
+      <div style={S.starRow}>
+        {[1,2,3,4,5].map(s => (
+          <div key={s} style={S.star(s <= 4)}>★</div>
         ))}
       </div>
-      <p style={{ textAlign: "center", fontSize: 12, color: "hsl(215, 10%, 50%)", marginBottom: 24 }}>Tap a star to rate</p>
-      <div style={emailStyles.infoBox}>
-        <div style={emailStyles.infoRow}>
-          <span style={emailStyles.infoLabel}>Pickup</span>
-          <span style={emailStyles.infoValue}>Tema Station</span>
-        </div>
-        <hr style={emailStyles.divider} />
-        <div style={emailStyles.infoRow}>
-          <span style={emailStyles.infoLabel}>Drop-off</span>
-          <span style={emailStyles.infoValue}>Kumasi Adum</span>
-        </div>
-        <hr style={emailStyles.divider} />
-        <div style={emailStyles.infoRow}>
-          <span style={emailStyles.infoLabel}>Fare Paid</span>
-          <span style={emailStyles.infoValue}>Gh₵125.00</span>
-        </div>
+      <p style={{ textAlign: "center", fontSize: 11, color: "#9ca3af", marginBottom: 20 }}>Tap a star to rate your experience</p>
+      <div style={S.box}>
+        <InfoRow label="Pickup" value="Tema Station" />
+        <InfoRow label="Drop-off" value="Kumasi Adum" />
+        <InfoRow label="Fare Paid" value="Gh₵125.00" highlight />
       </div>
-      <button style={emailStyles.button}>Submit Rating</button>
+      <button style={S.btn}>Submit Rating</button>
     </div>
-    <div style={emailStyles.footer}>
-      <p>Your feedback helps drivers provide better service.</p>
-      <p>© 2026 Mizrmo. All rights reserved.</p>
-    </div>
+    <Footer extra="Your review is anonymous and helps drivers improve." />
   </div>
 );
 
 const PromoEmail = () => (
-  <div style={emailStyles.wrapper}>
-    <div style={{ ...emailStyles.header, background: "linear-gradient(135deg, hsl(210,100%,35%), hsl(210,100%,25%))", padding: "40px 40px" }}>
-      <p style={emailStyles.logo}>Mizrmo</p>
-      <p style={{ color: "hsl(45, 100%, 55%)", fontSize: 28, fontWeight: 800, marginTop: 16 }}>20% OFF</p>
-      <p style={{ color: "white", fontSize: 14, opacity: 0.9, marginTop: 4 }}>Your next 3 rides!</p>
+  <div style={S.mail}>
+    <div style={{ ...S.hero("linear-gradient(135deg, #0056b3, #003d80)"), paddingBottom: 0 }}>
+      <Logo />
+      <p style={{ color: "#d4a017", fontSize: 32, fontWeight: 800, margin: "14px 0 2px" }}>20% OFF</p>
+      <p style={{ color: "rgba(255,255,255,0.85)", fontSize: 13, marginBottom: 0 }}>Your next 3 rides!</p>
+      <img src={emailPromo} alt="promo" style={{ width: "75%", marginTop: 10 }} />
     </div>
-    <div style={emailStyles.body}>
-      <h1 style={emailStyles.h1}>Weekend Special, Daniel! 🎊</h1>
-      <p style={emailStyles.subtitle}>
-        Enjoy 20% off your next 3 rides this weekend. Use the promo code below at checkout.
-      </p>
-      <div style={emailStyles.promoCode}>
-        <p style={{ fontSize: 11, color: "hsl(215, 10%, 50%)", margin: "0 0 8px", textTransform: "uppercase", letterSpacing: 1 }}>Promo Code</p>
-        <p style={emailStyles.promoText}>MIZ20WKND</p>
+    <div style={S.body}>
+      <h1 style={S.h1}>Weekend Special, Daniel! 🎊</h1>
+      <p style={S.sub}>Enjoy 20% off your next 3 rides this weekend. Use the code below at checkout.</p>
+      <div style={S.promoCode}>
+        <p style={{ fontSize: 10, color: "#9ca3af", margin: "0 0 6px", textTransform: "uppercase", letterSpacing: 1.5 }}>Promo Code</p>
+        <p style={S.promoText}>MIZ20WKND</p>
       </div>
-      <div style={emailStyles.infoBox}>
-        <div style={emailStyles.infoRow}>
-          <span style={emailStyles.infoLabel}>Discount</span>
-          <span style={emailStyles.infoValue}>20% off fare</span>
-        </div>
-        <hr style={emailStyles.divider} />
-        <div style={emailStyles.infoRow}>
-          <span style={emailStyles.infoLabel}>Valid For</span>
-          <span style={emailStyles.infoValue}>3 rides</span>
-        </div>
-        <hr style={emailStyles.divider} />
-        <div style={emailStyles.infoRow}>
-          <span style={emailStyles.infoLabel}>Expires</span>
-          <span style={emailStyles.infoValue}>Oct 6, 2030</span>
-        </div>
-        <hr style={emailStyles.divider} />
-        <div style={emailStyles.infoRow}>
-          <span style={emailStyles.infoLabel}>Max Discount</span>
-          <span style={emailStyles.infoValue}>Gh₵50 per ride</span>
-        </div>
+      <div style={S.box}>
+        <InfoRow label="Discount" value="20% off fare" />
+        <InfoRow label="Valid For" value="3 rides" />
+        <InfoRow label="Expires" value="Oct 6, 2030" />
+        <InfoRow label="Max Savings" value="Gh₵50/ride" />
       </div>
-      <button style={emailStyles.button}>Book a Ride Now</button>
+      <button style={S.btn}>Book a Ride Now</button>
     </div>
-    <div style={emailStyles.footer}>
-      <p>Terms apply. Cannot be combined with other offers.</p>
-      <p>© 2026 Mizrmo. All rights reserved.</p>
-    </div>
+    <Footer extra="Terms apply. Cannot be combined with other offers." />
   </div>
 );
 
-const templates = [
-  { key: "ride", label: "Ride Completed", component: <RideCompletedEmail /> },
-  { key: "welcome", label: "Welcome", component: <WelcomeEmail /> },
-  { key: "payment", label: "Payment Receipt", component: <PaymentReceiptEmail /> },
-  { key: "rate", label: "Rate Driver", component: <RateDriverEmail /> },
-  { key: "promo", label: "Promotion", component: <PromoEmail /> },
-];
+const SafetyEmail = () => (
+  <div style={S.mail}>
+    <div style={{ ...S.hero("#0056b3"), paddingBottom: 0 }}>
+      <Logo />
+      <img src={emailSafety} alt="safety" style={{ width: "65%", marginTop: 12 }} />
+    </div>
+    <div style={S.body}>
+      <span style={S.badge("#0056b3")}>Safety Update</span>
+      <h1 style={S.h1}>Your safety matters to us 🛡️</h1>
+      <p style={S.sub}>We've added new safety features to make every Mizrmo ride even more secure. Here's what's new:</p>
+      <div style={S.box}>
+        <div style={{ padding: "10px 0" }}>
+          <strong style={{ fontSize: 13, color: "#0e1b2e" }}>📍 Live Trip Sharing</strong>
+          <p style={{ margin: "3px 0 0", fontSize: 12, color: "#6b7280" }}>Share your real-time location with trusted contacts during any ride</p>
+        </div>
+        <hr style={S.hr} />
+        <div style={{ padding: "10px 0" }}>
+          <strong style={{ fontSize: 13, color: "#0e1b2e" }}>🚨 Emergency SOS Button</strong>
+          <p style={{ margin: "3px 0 0", fontSize: 12, color: "#6b7280" }}>One-tap emergency button that alerts authorities and your contacts</p>
+        </div>
+        <hr style={S.hr} />
+        <div style={{ padding: "10px 0" }}>
+          <strong style={{ fontSize: 13, color: "#0e1b2e" }}>✅ Verified Drivers</strong>
+          <p style={{ margin: "3px 0 0", fontSize: 12, color: "#6b7280" }}>All drivers now have enhanced background checks and ID verification</p>
+        </div>
+      </div>
+      <button style={S.btn}>Explore Safety Features</button>
+    </div>
+    <Footer extra="Ride safe with Mizrmo." />
+  </div>
+);
+
+const BookingConfirmEmail = () => (
+  <div style={S.mail}>
+    <div style={{ ...S.hero("#0056b3"), paddingBottom: 0 }}>
+      <Logo />
+      <img src={emailBooking} alt="booking" style={{ width: "55%", marginTop: 12 }} />
+    </div>
+    <div style={S.body}>
+      <span style={S.badge("#0056b3")}>Ride Booked</span>
+      <h1 style={S.h1}>Your ride is confirmed! 📍</h1>
+      <p style={S.sub}>A driver is on the way. Here are your booking details:</p>
+
+      {/* Timeline */}
+      <div style={{ marginBottom: 22 }}>
+        <div style={{ display: "flex", gap: 14, alignItems: "flex-start", marginBottom: 16 }}>
+          <div style={{ width: 12, height: 12, borderRadius: "50%", background: "#16a34a", marginTop: 3, flexShrink: 0 }} />
+          <div>
+            <p style={{ fontSize: 12, color: "#9ca3af", margin: 0 }}>PICKUP</p>
+            <p style={{ fontSize: 14, fontWeight: 600, color: "#0e1b2e", margin: "2px 0 0" }}>Tema Station</p>
+          </div>
+        </div>
+        <div style={{ width: 2, height: 20, background: "#e5e7eb", marginLeft: 5, marginBottom: 4 }} />
+        <div style={{ display: "flex", gap: 14, alignItems: "flex-start" }}>
+          <div style={{ width: 12, height: 12, borderRadius: "50%", background: "#dc2626", marginTop: 3, flexShrink: 0 }} />
+          <div>
+            <p style={{ fontSize: 12, color: "#9ca3af", margin: 0 }}>DROP-OFF</p>
+            <p style={{ fontSize: 14, fontWeight: 600, color: "#0e1b2e", margin: "2px 0 0" }}>Kumasi Adum</p>
+          </div>
+        </div>
+      </div>
+
+      <div style={S.box}>
+        <InfoRow label="Driver" value="Kwame Mensah" />
+        <InfoRow label="Vehicle" value="Toyota Corolla · GR-1234" />
+        <InfoRow label="ETA" value="5 mins" />
+        <InfoRow label="Est. Fare" value="Gh₵120 – 130" highlight />
+      </div>
+      <button style={S.btn}>Track Your Ride</button>
+      <button style={S.btnOutline}>Cancel Booking</button>
+    </div>
+    <Footer extra="Driver arriving soon. Be ready at pickup!" />
+  </div>
+);
+
+const LoyaltyEmail = () => (
+  <div style={S.mail}>
+    <div style={{ ...S.hero("linear-gradient(135deg, #0056b3, #003d80)"), paddingBottom: 0 }}>
+      <Logo />
+      <img src={emailLoyalty} alt="loyalty" style={{ width: "65%", marginTop: 12 }} />
+    </div>
+    <div style={S.body}>
+      <div style={{ textAlign: "center", marginBottom: 20 }}>
+        <span style={S.badge("#d4a017")}>Miz Miles</span>
+        <h1 style={{ ...S.h1, textAlign: "center" }}>You're a Gold Rider! 🏆</h1>
+        <p style={{ ...S.sub, textAlign: "center" }}>Congratulations Daniel! You've reached Gold status with 2,500 Miz Miles.</p>
+      </div>
+
+      {/* Points Display */}
+      <div style={{ background: "linear-gradient(135deg, #0056b3, #003d80)", borderRadius: 16, padding: "24px", textAlign: "center", marginBottom: 22, color: "#fff" }}>
+        <p style={{ fontSize: 11, opacity: 0.8, margin: "0 0 4px", textTransform: "uppercase", letterSpacing: 1.5 }}>Your Balance</p>
+        <p style={{ fontSize: 36, fontWeight: 800, margin: "0 0 4px" }}>2,500</p>
+        <p style={{ fontSize: 12, opacity: 0.7 }}>Miz Miles</p>
+      </div>
+
+      <div style={S.box}>
+        <div style={{ padding: "10px 0" }}>
+          <strong style={{ fontSize: 13, color: "#0e1b2e" }}>🎁 Gold Benefits Unlocked</strong>
+        </div>
+        <hr style={S.hr} />
+        <div style={{ ...S.row }}><span style={S.lbl}>Priority Matching</span><span style={{ color: "#16a34a", fontWeight: 600, fontSize: 13 }}>✓ Active</span></div>
+        <hr style={S.hr} />
+        <div style={{ ...S.row }}><span style={S.lbl}>5% Fare Discount</span><span style={{ color: "#16a34a", fontWeight: 600, fontSize: 13 }}>✓ Active</span></div>
+        <hr style={S.hr} />
+        <div style={{ ...S.row }}><span style={S.lbl}>Free Cancellations</span><span style={{ color: "#16a34a", fontWeight: 600, fontSize: 13 }}>3/month</span></div>
+        <hr style={S.hr} />
+        <div style={{ ...S.row }}><span style={S.lbl}>Next Tier (Platinum)</span><span style={{ color: "#0056b3", fontWeight: 600, fontSize: 13 }}>1,500 miles away</span></div>
+      </div>
+      <button style={S.btn}>Redeem Miles</button>
+    </div>
+    <Footer extra="Keep riding to unlock Platinum!" />
+  </div>
+);
+
+/* ── Main Page ───────────────────────────────────────────── */
+
+const templateComponents: Record<string, JSX.Element> = {
+  ride: <RideCompletedEmail />,
+  welcome: <WelcomeEmail />,
+  payment: <PaymentReceiptEmail />,
+  rate: <RateDriverEmail />,
+  promo: <PromoEmail />,
+  safety: <SafetyEmail />,
+  booking: <BookingConfirmEmail />,
+  loyalty: <LoyaltyEmail />,
+};
 
 const EmailTemplatesPage = () => {
   const [active, setActive] = useState("ride");
@@ -377,20 +357,30 @@ const EmailTemplatesPage = () => {
   return (
     <div>
       <DashboardHeader title="Email Templates" subtitle="Dashboard > Email Templates" />
-      <Tabs value={active} onValueChange={setActive}>
-        <TabsList className="mb-6">
-          {templates.map((t) => (
-            <TabsTrigger key={t.key} value={t.key}>{t.label}</TabsTrigger>
-          ))}
-        </TabsList>
+
+      {/* Tab bar */}
+      <div className="flex flex-wrap gap-2 mb-8">
         {templates.map((t) => (
-          <TabsContent key={t.key} value={t.key}>
-            <div className="flex justify-center py-8 bg-muted rounded-xl">
-              {t.component}
-            </div>
-          </TabsContent>
+          <button
+            key={t.key}
+            onClick={() => setActive(t.key)}
+            className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
+              active === t.key
+                ? "bg-primary text-primary-foreground shadow-md"
+                : "bg-card border border-border text-muted-foreground hover:bg-muted"
+            }`}
+          >
+            {t.label}
+          </button>
         ))}
-      </Tabs>
+      </div>
+
+      {/* Preview */}
+      <div className="bg-muted/50 rounded-2xl p-8 flex justify-center min-h-[600px]">
+        <div className="w-full max-w-[560px]">
+          {templateComponents[active]}
+        </div>
+      </div>
     </div>
   );
 };
