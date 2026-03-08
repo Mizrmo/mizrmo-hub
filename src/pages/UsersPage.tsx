@@ -78,7 +78,10 @@ const UsersPage = () => {
                 <td className="px-6 py-3 text-sm text-foreground">{user.rating}</td>
                 <td className="px-6 py-3">
                   <div className="flex items-center gap-2">
-                    <button className="text-muted-foreground hover:text-primary transition-colors">
+                    <button
+                      onClick={() => navigate(`/users/${user.id}`)}
+                      className="text-muted-foreground hover:text-primary transition-colors"
+                    >
                       <Eye size={16} />
                     </button>
                     <button className="text-muted-foreground hover:text-primary transition-colors">
