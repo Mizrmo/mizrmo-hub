@@ -18,6 +18,10 @@ const templates = [
   { key: "safety", label: "Safety" },
   { key: "booking", label: "Booking" },
   { key: "loyalty", label: "Loyalty" },
+  { key: "reset", label: "Password Reset" },
+  { key: "verify", label: "Email Verification" },
+  { key: "pwdchanged", label: "Password Changed" },
+  { key: "locked", label: "Account Locked" },
 ];
 
 /* ── Shared inline styles ─────────────────────────────────── */
@@ -338,6 +342,114 @@ const LoyaltyEmail = () => (
   </div>
 );
 
+const PasswordResetEmail = () => (
+  <div style={S.mail}>
+    <div style={{ ...S.hero("#0056b3"), paddingBottom: 0 }}>
+      <Logo />
+      <img src={emailSafety} alt="reset" style={{ width: "55%", marginTop: 12 }} />
+    </div>
+    <div style={S.body}>
+      <span style={S.badge("#dc2626")}>Password Reset</span>
+      <h1 style={S.h1}>Reset your password 🔐</h1>
+      <p style={S.sub}>We received a request to reset your password. Click the button below to create a new one.</p>
+      <div style={S.box}>
+        <InfoRow label="Account" value="daniel@example.com" />
+        <InfoRow label="Requested" value="Oct 1, 2030 at 2:45 PM" />
+        <InfoRow label="IP Address" value="192.168.1.1" />
+        <InfoRow label="Expires" value="1 hour" highlight />
+      </div>
+      <button style={S.btn}>Reset Password</button>
+      <p style={{ fontSize: 11, color: "#9ca3af", textAlign: "center", marginTop: 18, lineHeight: 1.6 }}>
+        If you didn't request this, please ignore this email or{" "}
+        <a href="#" style={{ color: "#0056b3", textDecoration: "underline" }}>contact support</a> if you have concerns.
+      </p>
+    </div>
+    <Footer extra="This link expires in 1 hour for your security." />
+  </div>
+);
+
+const EmailVerificationEmail = () => (
+  <div style={S.mail}>
+    <div style={{ ...S.hero("linear-gradient(135deg, #0056b3, #003d80)"), paddingBottom: 0 }}>
+      <Logo />
+      <p style={{ color: "rgba(255,255,255,0.8)", fontSize: 12, margin: "4px 0 0" }}>Almost there!</p>
+      <img src={emailWelcome} alt="verify" style={{ width: "55%", marginTop: 14 }} />
+    </div>
+    <div style={S.body}>
+      <h1 style={S.h1}>Verify your email address ✉️</h1>
+      <p style={S.sub}>Thanks for signing up, Daniel! Please verify your email to activate your Mizrmo account.</p>
+      <div style={{ background: "#f4f7fb", borderRadius: 14, padding: "20px", textAlign: "center", marginBottom: 22 }}>
+        <p style={{ fontSize: 11, color: "#9ca3af", margin: "0 0 8px", textTransform: "uppercase", letterSpacing: 1.5 }}>Verification Code</p>
+        <p style={{ fontSize: 32, fontWeight: 800, color: "#0056b3", letterSpacing: 8, margin: 0 }}>847293</p>
+      </div>
+      <p style={{ fontSize: 12, color: "#6b7280", textAlign: "center", marginBottom: 20 }}>
+        Or click the button below to verify instantly
+      </p>
+      <button style={S.btn}>Verify Email Address</button>
+      <p style={{ fontSize: 11, color: "#9ca3af", textAlign: "center", marginTop: 18 }}>
+        This code expires in 24 hours
+      </p>
+    </div>
+    <Footer extra="Having trouble? Reply to this email for help." />
+  </div>
+);
+
+const PasswordChangedEmail = () => (
+  <div style={S.mail}>
+    <div style={{ ...S.hero("#16a34a"), paddingBottom: 0 }}>
+      <Logo />
+      <img src={emailSafety} alt="changed" style={{ width: "50%", marginTop: 12 }} />
+    </div>
+    <div style={S.body}>
+      <span style={S.badge("#16a34a")}>Security Alert</span>
+      <h1 style={S.h1}>Password changed successfully ✅</h1>
+      <p style={S.sub}>Your Mizrmo account password was just updated. Your account is now more secure!</p>
+      <div style={S.box}>
+        <InfoRow label="Account" value="daniel@example.com" />
+        <InfoRow label="Changed On" value="Oct 1, 2030 at 3:12 PM" />
+        <InfoRow label="Device" value="Chrome on Windows" />
+        <InfoRow label="Location" value="Accra, Ghana" />
+      </div>
+      <p style={{ fontSize: 12, color: "#6b7280", textAlign: "center", marginBottom: 18 }}>
+        If this wasn't you, secure your account immediately
+      </p>
+      <button style={S.btn}>Review Account Activity</button>
+      <button style={S.btnOutline}>Contact Support</button>
+    </div>
+    <Footer extra="Keep your password safe and don't share it with anyone." />
+  </div>
+);
+
+const AccountLockedEmail = () => (
+  <div style={S.mail}>
+    <div style={{ ...S.hero("#dc2626"), paddingBottom: 0 }}>
+      <Logo />
+      <img src={emailSafety} alt="locked" style={{ width: "60%", marginTop: 12 }} />
+    </div>
+    <div style={S.body}>
+      <span style={S.badge("#dc2626")}>Security Alert</span>
+      <h1 style={S.h1}>Account temporarily locked 🔒</h1>
+      <p style={S.sub}>We detected unusual activity on your account and locked it to protect your security.</p>
+      <div style={S.box}>
+        <div style={{ padding: "10px 0" }}>
+          <strong style={{ fontSize: 13, color: "#0e1b2e" }}>🚨 Why was my account locked?</strong>
+          <p style={{ margin: "3px 0 0", fontSize: 12, color: "#6b7280" }}>Multiple failed login attempts from an unknown location</p>
+        </div>
+        <hr style={S.hr} />
+        <InfoRow label="Detected" value="Oct 1, 2030 at 4:20 PM" />
+        <InfoRow label="Suspicious IP" value="45.123.67.89" />
+        <InfoRow label="Location" value="Unknown, Nigeria" />
+      </div>
+      <button style={S.btn}>Unlock My Account</button>
+      <p style={{ fontSize: 11, color: "#9ca3af", textAlign: "center", marginTop: 18, lineHeight: 1.6 }}>
+        You'll need to verify your identity to regain access.{" "}
+        <a href="#" style={{ color: "#0056b3", textDecoration: "underline" }}>Learn more</a>
+      </p>
+    </div>
+    <Footer extra="Your security is our top priority." />
+  </div>
+);
+
 /* ── Main Page ───────────────────────────────────────────── */
 
 const templateComponents: Record<string, JSX.Element> = {
@@ -349,6 +461,10 @@ const templateComponents: Record<string, JSX.Element> = {
   safety: <SafetyEmail />,
   booking: <BookingConfirmEmail />,
   loyalty: <LoyaltyEmail />,
+  reset: <PasswordResetEmail />,
+  verify: <EmailVerificationEmail />,
+  pwdchanged: <PasswordChangedEmail />,
+  locked: <AccountLockedEmail />,
 };
 
 const EmailTemplatesPage = () => {
