@@ -461,6 +461,10 @@ const templateComponents: Record<string, JSX.Element> = {
   safety: <SafetyEmail />,
   booking: <BookingConfirmEmail />,
   loyalty: <LoyaltyEmail />,
+  reset: <PasswordResetEmail />,
+  verify: <EmailVerificationEmail />,
+  pwdchanged: <PasswordChangedEmail />,
+  locked: <AccountLockedEmail />,
 };
 
 const EmailTemplatesPage = () => {
