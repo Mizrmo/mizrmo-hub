@@ -8,6 +8,8 @@ import DashboardLayout from "./layouts/DashboardLayout";
 import Dashboard from "./pages/Dashboard";
 import UsersPage from "./pages/UsersPage";
 import PricingPage from "./pages/PricingPage";
+import FinancePage from "./pages/FinancePage";
+import EmailTemplatesPage from "./pages/EmailTemplatesPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
