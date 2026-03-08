@@ -12,6 +12,8 @@ import DriversPage from "./pages/DriversPage";
 import RidesPage from "./pages/RidesPage";
 import PricingPage from "./pages/PricingPage";
 import FinancePage from "./pages/FinancePage";
+import DocumentsPage from "./pages/DocumentsPage";
+import MizMilesPage from "./pages/MizMilesPage";
 import SupportPage from "./pages/SupportPage";
 import SecurityPage from "./pages/SecurityPage";
 import EmailTemplatesPage from "./pages/EmailTemplatesPage";
@@ -33,8 +35,10 @@ const App = () => (
             <Route path="/users/:id" element={<UserDetailPage />} />
             <Route path="/drivers" element={<DriversPage />} />
             <Route path="/rides" element={<RidesPage />} />
-            <Route path="/pricing" element={<PricingPage />} />
             <Route path="/finance" element={<FinancePage />} />
+            <Route path="/documents" element={<DocumentsPage />} />
+            <Route path="/miz-miles" element={<MizMilesPage />} />
+            <Route path="/pricing" element={<PricingPage />} />
             <Route path="/support" element={<SupportPage />} />
             <Route path="/security" element={<SecurityPage />} />
             <Route path="/email-templates" element={<EmailTemplatesPage />} />
