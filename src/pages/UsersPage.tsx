@@ -1,4 +1,5 @@
 import { Users, UserCheck, Car, DollarSign, Eye, Pencil, ChevronLeft, ChevronRight } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import DashboardHeader from "@/components/DashboardHeader";
 import StatsCard from "@/components/StatsCard";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -18,7 +19,7 @@ const usersData = [
 
 const UsersPage = () => {
   const [currentPage, setCurrentPage] = useState(1);
-
+  const navigate = useNavigate();
   return (
     <div>
       <DashboardHeader title="Users" subtitle="Dashboard" searchPlaceholder="search user" />
@@ -77,7 +78,10 @@ const UsersPage = () => {
                 <td className="px-6 py-3 text-sm text-foreground">{user.rating}</td>
                 <td className="px-6 py-3">
                   <div className="flex items-center gap-2">
-                    <button className="text-muted-foreground hover:text-primary transition-colors">
+                    <button
+                      onClick={() => navigate(`/users/${user.id}`)}
+                      className="text-muted-foreground hover:text-primary transition-colors"
+                    >
                       <Eye size={16} />
                     </button>
                     <button className="text-muted-foreground hover:text-primary transition-colors">
