@@ -18,6 +18,10 @@ const templates = [
   { key: "safety", label: "Safety" },
   { key: "booking", label: "Booking" },
   { key: "loyalty", label: "Loyalty" },
+  { key: "reset", label: "Password Reset" },
+  { key: "verify", label: "Email Verification" },
+  { key: "pwdchanged", label: "Password Changed" },
+  { key: "locked", label: "Account Locked" },
 ];
 
 /* ── Shared inline styles ─────────────────────────────────── */
