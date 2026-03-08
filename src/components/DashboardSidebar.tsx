@@ -30,7 +30,7 @@ const navItems = [
   { label: "Support", icon: Headphones, path: "/support" },
   { label: "Security", icon: Shield, path: "/security" },
   { label: "Email Templates", icon: Mail, path: "/email-templates" },
-];
+  { label: "Settings", icon: Settings, path: "/settings" },
 
 const DashboardSidebar = () => {
   const location = useLocation();

@@ -43,6 +43,7 @@ const App = () => (
             <Route path="/support" element={<SupportPage />} />
             <Route path="/security" element={<SecurityPage />} />
             <Route path="/email-templates" element={<EmailTemplatesPage />} />
+            <Route path="/settings" element={<SettingsPage />} />
           </Route>
           <Route path="*" element={<NotFound />} />
         </Routes>
