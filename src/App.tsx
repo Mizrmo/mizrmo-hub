@@ -8,6 +8,8 @@ import DashboardLayout from "./layouts/DashboardLayout";
 import Dashboard from "./pages/Dashboard";
 import UsersPage from "./pages/UsersPage";
 import PricingPage from "./pages/PricingPage";
+import FinancePage from "./pages/FinancePage";
+import EmailTemplatesPage from "./pages/EmailTemplatesPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -24,6 +26,8 @@ const App = () => (
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/users" element={<UsersPage />} />
             <Route path="/pricing" element={<PricingPage />} />
+            <Route path="/finance" element={<FinancePage />} />
+            <Route path="/email-templates" element={<EmailTemplatesPage />} />
           </Route>
           <Route path="*" element={<NotFound />} />
         </Routes>
