@@ -19,7 +19,7 @@ const usersData = [
 
 const UsersPage = () => {
   const [currentPage, setCurrentPage] = useState(1);
-
+  const navigate = useNavigate();
   return (
     <div>
       <DashboardHeader title="Users" subtitle="Dashboard" searchPlaceholder="search user" />
