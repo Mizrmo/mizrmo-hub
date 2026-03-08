@@ -61,7 +61,8 @@ const SecurityPage = () => {
 
       {/* Table */}
       <div className="bg-card rounded-xl border border-border overflow-hidden">
-        <table className="w-full">
+        <div className="overflow-x-auto">
+          <table className="w-full min-w-[800px]">
           <thead>
             <tr className="border-b border-border">
               <th className="text-left text-sm font-semibold text-foreground px-6 py-3">Driver ID</th>
@@ -108,8 +109,9 @@ const SecurityPage = () => {
             ))}
           </tbody>
         </table>
+        </div>
 
-        <div className="px-6 py-4 flex items-center justify-between border-t border-border">
+        <div className="px-6 py-4 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-border">
           <p className="text-sm text-muted-foreground">Showing 1 to 7 out of 60 records</p>
           <div className="flex items-center gap-2">
             <button className="p-1 text-muted-foreground hover:text-foreground"><ChevronLeft size={18} /></button>
