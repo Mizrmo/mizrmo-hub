@@ -24,6 +24,7 @@ const navItems = [
   { label: "Pricing", icon: DollarSign, path: "/pricing" },
   { label: "Support & Communication", icon: Headphones, path: "/support" },
   { label: "Security & Compliance", icon: Shield, path: "/security" },
+  { label: "Email Templates", icon: FileText, path: "/email-templates" },
 ];
 
 const DashboardSidebar = () => {
