@@ -61,7 +61,8 @@ const SecurityPage = () => {
 
       {/* Table */}
       <div className="bg-card rounded-xl border border-border overflow-hidden">
-        <table className="w-full">
+        <div className="overflow-x-auto">
+          <table className="w-full min-w-[800px]">
           <thead>
             <tr className="border-b border-border">
               <th className="text-left text-sm font-semibold text-foreground px-6 py-3">Driver ID</th>
