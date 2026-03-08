@@ -17,6 +17,7 @@ import MizMilesPage from "./pages/MizMilesPage";
 import SupportPage from "./pages/SupportPage";
 import SecurityPage from "./pages/SecurityPage";
 import EmailTemplatesPage from "./pages/EmailTemplatesPage";
+import SettingsPage from "./pages/SettingsPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -42,6 +43,7 @@ const App = () => (
             <Route path="/support" element={<SupportPage />} />
             <Route path="/security" element={<SecurityPage />} />
             <Route path="/email-templates" element={<EmailTemplatesPage />} />
+            <Route path="/settings" element={<SettingsPage />} />
           </Route>
           <Route path="*" element={<NotFound />} />
         </Routes>
