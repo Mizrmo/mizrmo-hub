@@ -1,10 +1,17 @@
+import { useState } from "react";
 import DashboardHeader from "@/components/DashboardHeader";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ArrowUpRight, Wallet, TrendingDown, Award, Gift } from "lucide-react";
+import { ArrowUpRight, Wallet, TrendingDown, Award, Gift, Plus } from "lucide-react";
+import AddPromotionDialog from "@/components/finance/AddPromotionDialog";
+import ViewPaymentDialog from "@/components/finance/ViewPaymentDialog";
+import PayDriverDialog from "@/components/finance/PayDriverDialog";
+import SetFareDialog from "@/components/finance/SetFareDialog";
+import RefundActionDialog from "@/components/finance/RefundActionDialog";
+import SeeAllDialog from "@/components/finance/SeeAllDialog";
 
 const pendingRefunds = [
   { name: "Daniel Asante", amount: "GH₵125", route: "Tema-Kumasi" },
@@ -18,25 +25,36 @@ const pendingOutflows = [
 
 const paymentsToday = [
   { id: "mzpymnt_120", type: "Payment- Transport", amount: "Gh₵500.00", date: "Sep 30, 2030" },
-  { id: "mzpymnt_120", type: "Payment- Transport", amount: "Gh₵350.00", date: "Dec 30, 2030" },
-  { id: "mzpymnt_120", type: "Payment- Transport", amount: "Gh₵700.00", date: "Nov 30, 2030" },
+  { id: "mzpymnt_121", type: "Payment- Transport", amount: "Gh₵350.00", date: "Dec 30, 2030" },
+  { id: "mzpymnt_122", type: "Payment- Transport", amount: "Gh₵700.00", date: "Nov 30, 2030" },
 ];
 
 const toPay = [
   { id: "mzpymnt_120", type: "Payment- Transport", paidTo: "Daniel Asante", amount: "Gh₵500.00", date: "Sep 30, 2030" },
-  { id: "mzpymnt_120", type: "Payment- Transport", paidTo: "Daniel Asante", amount: "Gh₵500.00", date: "Sep 30, 2030" },
-  { id: "mzpymnt_120", type: "Payment- Transport", paidTo: "Daniel Asante", amount: "Gh₵500.00", date: "Sep 30, 2030" },
+  { id: "mzpymnt_121", type: "Payment- Transport", paidTo: "Daniel Asante", amount: "Gh₵500.00", date: "Sep 30, 2030" },
+  { id: "mzpymnt_122", type: "Payment- Transport", paidTo: "Daniel Asante", amount: "Gh₵500.00", date: "Sep 30, 2030" },
+];
+
+const promotions = [
+  { name: "15% off Ride", reward: "158 Miz miles", expiry: "Sep 30, 2030" },
+  { name: "15% off Ride", reward: "158 Miz miles", expiry: "Sep 30, 2030" },
 ];
 
 const FinancePage = () => {
+  const [promoOpen, setPromoOpen] = useState(false);
+  const [fareOpen, setFareOpen] = useState(false);
+  const [viewPayment, setViewPayment] = useState<typeof paymentsToday[0] | null>(null);
+  const [payDriver, setPayDriver] = useState<typeof toPay[0] | null>(null);
+  const [refundItem, setRefundItem] = useState<typeof pendingRefunds[0] | null>(null);
+  const [seeAll, setSeeAll] = useState<{ title: string; type: "refunds" | "outflows" | "payments" | "topay" } | null>(null);
+
   return (
     <div>
       <DashboardHeader title="Financial Management" subtitle="Dashboard > Financial Management" />
 
       {/* Top Stats Row */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-6">
-        {/* Total Inflows */}
-        <Card className="bg-primary text-primary-foreground border-none">
+        <Card className="bg-primary text-primary-foreground border-none cursor-pointer hover:opacity-90 transition-opacity">
           <CardContent className="p-5">
             <p className="text-xs opacity-80">Sa/Fdksfs</p>
             <p className="text-sm font-medium mt-1">Total Inflows</p>
@@ -48,7 +66,6 @@ const FinancePage = () => {
           </CardContent>
         </Card>
 
-        {/* Today Stats */}
         <Card>
           <CardContent className="p-5">
             <div className="flex items-center justify-between mb-4">
@@ -74,7 +91,6 @@ const FinancePage = () => {
           </CardContent>
         </Card>
 
-        {/* Commission / Miz Miles */}
         <Card>
           <CardContent className="p-5">
             <div className="flex items-center justify-between mb-4">
@@ -101,7 +117,7 @@ const FinancePage = () => {
         </Card>
       </div>
 
-      {/* Middle Row: Refunds/Promo + Pending Outflows */}
+      {/* Middle Row */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-6">
         <div className="md:col-span-2">
           <Card>
@@ -118,21 +134,47 @@ const FinancePage = () => {
                 <TabsContent value="refunds">
                   <div className="flex items-center justify-between mb-3">
                     <p className="text-sm text-muted-foreground">Pending Refunds</p>
-                    <button className="text-xs text-primary font-medium">See All</button>
+                    <button className="text-xs text-primary font-medium hover:underline" onClick={() => setSeeAll({ title: "All Refunds", type: "refunds" })}>See All</button>
                   </div>
                   <div className="space-y-3">
                     {pendingRefunds.map((r, i) => (
-                      <div key={i} className="flex items-center justify-between py-2 border-b border-border last:border-0">
+                      <div key={i} className="flex items-center justify-between py-2 border-b border-border last:border-0 cursor-pointer hover:bg-muted/50 rounded px-2 -mx-2 transition-colors" onClick={() => setRefundItem(r)}>
                         <div>
                           <p className="text-sm font-medium text-foreground">{r.name} - {r.amount}</p>
                           <p className="text-xs text-muted-foreground">{r.route}</p>
                         </div>
+                        <Button variant="ghost" size="sm" className="text-xs">Process</Button>
                       </div>
                     ))}
                   </div>
                 </TabsContent>
                 <TabsContent value="promotion">
-                  <p className="text-sm text-muted-foreground">No active promotions</p>
+                  <div className="flex items-center justify-between mb-3">
+                    <p className="text-sm text-muted-foreground">Active Promotions</p>
+                    <Button size="sm" variant="default" className="rounded-full gap-1 text-xs" onClick={() => setPromoOpen(true)}>
+                      <Plus size={14} /> Create Reward
+                    </Button>
+                  </div>
+                  <div className="space-y-3">
+                    {promotions.map((p, i) => (
+                      <div key={i} className="flex items-center justify-between py-2 border-b border-border last:border-0">
+                        <div className="flex items-center gap-3">
+                          <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center">
+                            <Gift size={12} className="text-primary" />
+                          </div>
+                          <div>
+                            <p className="text-sm font-medium text-foreground">{p.name}</p>
+                            <p className="text-xs text-muted-foreground">{p.reward}</p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs text-muted-foreground">{p.expiry}</span>
+                          <Button variant="ghost" size="icon" className="h-7 w-7"><span className="text-xs">✏️</span></Button>
+                          <Button variant="ghost" size="icon" className="h-7 w-7"><span className="text-xs">🗑️</span></Button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </TabsContent>
               </Tabs>
             </CardContent>
@@ -143,7 +185,7 @@ const FinancePage = () => {
           <CardContent className="p-5">
             <div className="flex items-center justify-between mb-4">
               <p className="text-sm font-semibold text-foreground">Pending Outflows - Driver</p>
-              <button className="text-xs text-primary font-medium">See All</button>
+              <button className="text-xs text-primary font-medium hover:underline" onClick={() => setSeeAll({ title: "All Pending Outflows", type: "outflows" })}>See All</button>
             </div>
             <div className="space-y-3 mb-5">
               {pendingOutflows.map((o, i) => (
@@ -153,7 +195,7 @@ const FinancePage = () => {
                 </div>
               ))}
             </div>
-            <Button className="w-full rounded-full">Set Fare</Button>
+            <Button className="w-full rounded-full" onClick={() => setFareOpen(true)}>Set Fare</Button>
           </CardContent>
         </Card>
       </div>
@@ -163,7 +205,7 @@ const FinancePage = () => {
         <CardContent className="p-5">
           <div className="flex items-center justify-between mb-4">
             <p className="text-sm font-semibold text-foreground">Payments Today</p>
-            <button className="text-xs text-primary font-medium">See All</button>
+            <button className="text-xs text-primary font-medium hover:underline" onClick={() => setSeeAll({ title: "All Payments", type: "payments" })}>See All</button>
           </div>
           <Table>
             <TableHeader>
@@ -177,7 +219,7 @@ const FinancePage = () => {
             </TableHeader>
             <TableBody>
               {paymentsToday.map((p, i) => (
-                <TableRow key={i}>
+                <TableRow key={i} className="cursor-pointer hover:bg-muted/50" onClick={() => setViewPayment(p)}>
                   <TableCell className="text-sm">
                     <span className="inline-flex items-center gap-2">
                       <span className="w-6 h-6 rounded-md bg-foreground/10 flex items-center justify-center">
@@ -190,7 +232,7 @@ const FinancePage = () => {
                   <TableCell className="text-sm font-medium">{p.amount}</TableCell>
                   <TableCell className="text-sm">{p.date}</TableCell>
                   <TableCell>
-                    <button className="text-xs text-primary font-medium">View</button>
+                    <Button variant="ghost" size="sm" className="text-xs text-primary font-medium" onClick={(e) => { e.stopPropagation(); setViewPayment(p); }}>View</Button>
                   </TableCell>
                 </TableRow>
               ))}
@@ -204,7 +246,7 @@ const FinancePage = () => {
         <CardContent className="p-5">
           <div className="flex items-center justify-between mb-4">
             <p className="text-sm font-semibold text-foreground">To Pay</p>
-            <button className="text-xs text-primary font-medium">See All</button>
+            <button className="text-xs text-primary font-medium hover:underline" onClick={() => setSeeAll({ title: "All Pending Payments", type: "topay" })}>See All</button>
           </div>
           <Table>
             <TableHeader>
@@ -233,7 +275,7 @@ const FinancePage = () => {
                   <TableCell className="text-sm font-medium">{p.amount}</TableCell>
                   <TableCell className="text-sm">{p.date}</TableCell>
                   <TableCell>
-                    <button className="text-xs text-primary font-medium">Pay</button>
+                    <Button variant="ghost" size="sm" className="text-xs text-primary font-medium" onClick={() => setPayDriver(p)}>Pay</Button>
                   </TableCell>
                 </TableRow>
               ))}
@@ -241,6 +283,14 @@ const FinancePage = () => {
           </Table>
         </CardContent>
       </Card>
+
+      {/* Dialogs */}
+      <AddPromotionDialog open={promoOpen} onOpenChange={setPromoOpen} />
+      <ViewPaymentDialog open={!!viewPayment} onOpenChange={(o) => !o && setViewPayment(null)} payment={viewPayment} />
+      <PayDriverDialog open={!!payDriver} onOpenChange={(o) => !o && setPayDriver(null)} item={payDriver} />
+      <SetFareDialog open={fareOpen} onOpenChange={setFareOpen} />
+      <RefundActionDialog open={!!refundItem} onOpenChange={(o) => !o && setRefundItem(null)} refund={refundItem} />
+      <SeeAllDialog open={!!seeAll} onOpenChange={(o) => !o && setSeeAll(null)} title={seeAll?.title ?? ""} type={seeAll?.type ?? "refunds"} />
     </div>
   );
 };
