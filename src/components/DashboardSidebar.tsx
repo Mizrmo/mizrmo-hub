@@ -86,18 +86,20 @@ const DashboardSidebar = () => {
   return (
     <>
       {/* Mobile toggle */}
-      <button
-        onClick={() => setMobileOpen(true)}
-        className="lg:hidden fixed top-4 left-4 z-50 p-2 rounded-lg bg-primary text-primary-foreground shadow-lg"
-      >
-        <Menu size={20} />
-      </button>
+      {!mobileOpen && (
+        <button
+          onClick={() => setMobileOpen(true)}
+          className="lg:hidden fixed top-4 left-4 z-50 p-2 rounded-lg bg-primary text-primary-foreground shadow-lg"
+        >
+          <Menu size={20} />
+        </button>
+      )}
 
       {/* Mobile overlay */}
       {mobileOpen && (
         <div className="lg:hidden fixed inset-0 z-40 bg-foreground/40" onClick={() => setMobileOpen(false)}>
           <aside
-            className="w-60 min-h-screen bg-sidebar flex flex-col relative"
+            className="w-60 h-screen bg-sidebar flex flex-col relative"
             onClick={(e) => e.stopPropagation()}
           >
             <button
@@ -112,7 +114,7 @@ const DashboardSidebar = () => {
       )}
 
       {/* Desktop sidebar */}
-      <aside className="hidden lg:flex w-56 min-h-screen bg-sidebar flex-col shrink-0">
+      <aside className="hidden lg:flex w-56 h-screen sticky top-0 bg-sidebar flex-col shrink-0">
         {sidebarContent}
       </aside>
     </>

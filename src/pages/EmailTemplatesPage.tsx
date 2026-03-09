@@ -27,29 +27,29 @@ const templates = [
 /* ── Shared inline styles ─────────────────────────────────── */
 const S = {
   mail: { fontFamily: "'Inter', Arial, sans-serif", maxWidth: 520, margin: "0 auto", background: "#fff", borderRadius: 20, overflow: "hidden" as const, boxShadow: "0 8px 40px rgba(0,56,179,0.10)" },
-  heroImg: { width: "100%", height: 200, objectFit: "cover" as const },
-  body: { padding: "28px 36px 36px" },
-  h1: { fontSize: 21, fontWeight: 700, color: "#0e1b2e", margin: "0 0 6px" },
-  sub: { fontSize: 13, color: "#6b7280", margin: "0 0 20px", lineHeight: 1.65 },
-  box: { background: "#f4f7fb", borderRadius: 14, padding: "18px 22px", marginBottom: 22 },
-  row: { display: "flex", justifyContent: "space-between", padding: "7px 0", fontSize: 13 },
-  lbl: { color: "#6b7280", fontWeight: 500 as const },
-  val: { color: "#0e1b2e", fontWeight: 600 as const },
-  hr: { height: 1, background: "#e5e7eb", margin: "0", border: "none" },
-  btn: { display: "block", width: "100%", textAlign: "center" as const, background: "#0056b3", color: "#fff", padding: "14px 0", borderRadius: 50, fontSize: 14, fontWeight: 600, border: "none", cursor: "pointer", textDecoration: "none" },
-  btnOutline: { display: "block", width: "100%", textAlign: "center" as const, background: "transparent", color: "#0056b3", padding: "12px 0", borderRadius: 50, fontSize: 13, fontWeight: 600, border: "2px solid #0056b3", cursor: "pointer", marginTop: 10 },
-  foot: { textAlign: "center" as const, padding: "0 36px 28px", fontSize: 11, color: "#9ca3af", lineHeight: 1.7 },
-  badge: (bg: string) => ({ display: "inline-block", background: `linear-gradient(135deg, ${bg}, ${bg} 60%, #d4a017)`, color: "#fff", padding: "3px 10px", borderRadius: 50, fontSize: 10, fontWeight: 600, marginBottom: 14, letterSpacing: 0.5 }),
+  heroImg: { width: "100%", height: 160, objectFit: "contain" as const },
+  body: { padding: "24px 40px 40px" },
+  h1: { fontSize: 24, fontWeight: 800, color: "#0f172a", margin: "0 0 8px", letterSpacing: -0.5 },
+  sub: { fontSize: 14, color: "#475569", margin: "0 0 24px", lineHeight: 1.6 },
+  box: { background: "#f8fafc", border: "1px solid #e2e8f0", borderRadius: 16, padding: "20px 24px", marginBottom: 24 },
+  row: { display: "flex", justifyContent: "space-between", padding: "8px 0", fontSize: 14 },
+  lbl: { color: "#64748b", fontWeight: 500 as const },
+  val: { color: "#0f172a", fontWeight: 600 as const },
+  hr: { height: 1, background: "#e2e8f0", margin: "0", border: "none" },
+  btn: { display: "block", width: "100%", textAlign: "center" as const, background: "#0056b3", color: "#fff", padding: "16px 0", borderRadius: 50, fontSize: 15, fontWeight: 600, border: "none", cursor: "pointer", textDecoration: "none", transition: "all 0.2s ease" },
+  btnOutline: { display: "block", width: "100%", textAlign: "center" as const, background: "transparent", color: "#0056b3", padding: "14px 0", borderRadius: 50, fontSize: 14, fontWeight: 600, border: "2px solid #0056b3", cursor: "pointer", marginTop: 12, transition: "all 0.2s ease" },
+  foot: { textAlign: "center" as const, padding: "0 40px 32px", fontSize: 12, color: "#94a3b8", lineHeight: 1.7 },
+  badge: (bg: string) => ({ display: "inline-block", background: `linear-gradient(135deg, ${bg}, ${bg} 60%, #d4a017)`, color: "#fff", padding: "6px 14px", borderRadius: 50, fontSize: 11, fontWeight: 700, marginBottom: 16, letterSpacing: 0.5 }),
   accent: { color: "#0056b3", fontWeight: 700 as const },
   gold: { color: "#d4a017", fontWeight: 700 as const },
-  hero: (bg: string) => ({ background: bg, padding: "28px 36px 0", textAlign: "center" as const }),
+  hero: (bg: string) => ({ background: bg, padding: "40px 36px 0", textAlign: "center" as const }),
   starRow: { display: "flex", justifyContent: "center", gap: 6, margin: "14px 0" },
   star: (filled: boolean) => ({ width: 38, height: 38, borderRadius: "50%", display: "inline-flex", alignItems: "center", justifyContent: "center", fontSize: 20, border: "2px solid #d4a017", background: filled ? "#d4a017" : "transparent", color: filled ? "#fff" : "#d4a017", cursor: "pointer" }),
-  promoCode: { background: "#f4f7fb", border: "2px dashed #0056b3", borderRadius: 14, padding: "14px 24px", textAlign: "center" as const, marginBottom: 22 },
+  promoCode: { background: "#f8fafc", border: "2px dashed #0056b3", borderRadius: 16, padding: "16px 24px", textAlign: "center" as const, marginBottom: 24 },
   promoText: { fontSize: 26, fontWeight: 800, color: "#0056b3", letterSpacing: 4 },
-  timeline: { position: "relative" as const, paddingLeft: 24, marginBottom: 22 },
+  timeline: { position: "relative" as const, paddingLeft: 24, marginBottom: 24 },
   dot: (color: string) => ({ width: 10, height: 10, borderRadius: "50%", background: color, position: "absolute" as const, left: 0, top: 5 }),
-  line: { position: "absolute" as const, left: 4, top: 18, width: 2, height: "calc(100% - 18px)", background: "#e5e7eb" },
+  line: { position: "absolute" as const, left: 4, top: 18, width: 2, height: "calc(100% - 18px)", background: "#e2e8f0" },
 };
 
 const Logo = () => (
@@ -92,11 +92,11 @@ const RideCompletedEmail = () => (
     </div>
     <div style={S.body}>
       <span style={S.badge("#16a34a")}>Trip Complete</span>
-      <h1 style={S.h1}>Your ride is done! 🎉</h1>
+      <h1 style={S.h1}>Your ride is completed! 🎉</h1>
       <p style={S.sub}>Thanks for riding with Mizrmo, Daniel. Here's your trip summary.</p>
       <div style={S.box}>
         <InfoRow label="Pickup" value="Tema Station" />
-        <InfoRow label="Drop-off" value="Kumasi Adum" />
+        <InfoRow label="Drop-off" value="Accra Central" />
         <InfoRow label="Driver" value="Kwame Mensah" />
         <InfoRow label="Distance" value="245 km" />
         <InfoRow label="Duration" value="3h 20m" />
@@ -159,7 +159,7 @@ const PaymentReceiptEmail = () => (
       <div style={S.box}>
         <InfoRow label="Date" value="Sep 30, 2030" />
         <InfoRow label="Type" value="Transport Payment" />
-        <InfoRow label="Route" value="Tema → Kumasi" />
+        <InfoRow label="Route" value="Tema → Accra" />
         <InfoRow label="Method" value="MTN Mobile Money" />
         <InfoRow label="Driver" value="Kwame Mensah" />
       </div>
@@ -182,7 +182,7 @@ const RateDriverEmail = () => (
       <div style={{ textAlign: "center", marginBottom: 20 }}>
         <div style={{ width: 64, height: 64, borderRadius: "50%", background: "#0056b3", display: "inline-flex", alignItems: "center", justifyContent: "center", color: "#fff", fontSize: 24, fontWeight: 700 }}>KM</div>
         <p style={{ fontSize: 15, fontWeight: 600, color: "#0e1b2e", marginTop: 10 }}>Kwame Mensah</p>
-        <p style={{ fontSize: 12, color: "#6b7280" }}>Tema → Kumasi · Sep 30</p>
+        <p style={{ fontSize: 12, color: "#6b7280" }}>Tema → Accra · Sep 30</p>
       </div>
       <div style={S.starRow}>
         {[1,2,3,4,5].map(s => (
@@ -192,7 +192,7 @@ const RateDriverEmail = () => (
       <p style={{ textAlign: "center", fontSize: 11, color: "#9ca3af", marginBottom: 20 }}>Tap a star to rate your experience</p>
       <div style={S.box}>
         <InfoRow label="Pickup" value="Tema Station" />
-        <InfoRow label="Drop-off" value="Kumasi Adum" />
+        <InfoRow label="Drop-off" value="Accra Central" />
         <InfoRow label="Fare Paid" value="Gh₵125.00" highlight />
       </div>
       <button style={S.btn}>Submit Rating</button>
@@ -285,7 +285,7 @@ const BookingConfirmEmail = () => (
           <div style={{ width: 12, height: 12, borderRadius: "50%", background: "#dc2626", marginTop: 3, flexShrink: 0 }} />
           <div>
             <p style={{ fontSize: 12, color: "#9ca3af", margin: 0 }}>DROP-OFF</p>
-            <p style={{ fontSize: 14, fontWeight: 600, color: "#0e1b2e", margin: "2px 0 0" }}>Kumasi Adum</p>
+            <p style={{ fontSize: 14, fontWeight: 600, color: "#0e1b2e", margin: "2px 0 0" }}>Accra Central</p>
           </div>
         </div>
       </div>

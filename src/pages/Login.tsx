@@ -2,7 +2,8 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import loginIllustration from "@/assets/login-illustration.png";
+import { LoginIllustration } from "@/components/LoginIllustration";
+import mizrmoLogo from "@/assets/mizrmo_logo.png";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -17,15 +18,13 @@ const Login = () => {
   return (
     <div className="flex min-h-screen">
       {/* Left panel */}
-      <div className="hidden md:flex md:w-1/2 bg-primary flex-col items-center justify-center p-12 relative">
-        <h1 className="text-4xl font-extrabold tracking-tight text-primary-foreground mb-8">
-          mizrm<span className="text-accent">o</span>
-        </h1>
+      <div className="hidden md:flex md:w-1/2 bg-primary flex-col items-center justify-center p-12 relative overflow-hidden">
         <img
-          src={loginIllustration}
-          alt="Ride hailing illustration"
-          className="w-full max-w-md object-contain"
+          src={mizrmoLogo}
+          alt="Mizrmo Logo"
+          className="h-12 w-auto object-contain mb-8 z-10"
         />
+        <LoginIllustration className="w-full max-w-lg object-contain text-white z-10 drop-shadow-2xl" />
       </div>
 
       {/* Right panel */}
