@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Users, UserCheck, Car, DollarSign, Eye, ChevronLeft, ChevronRight } from "lucide-react";
+import { Users, UserCheck, Car, Banknote, Eye, ChevronLeft, ChevronRight } from "lucide-react";
 import DashboardHeader from "@/components/DashboardHeader";
 import StatsCard from "@/components/StatsCard";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -14,14 +14,14 @@ import {
 } from "@/components/ui/select";
 
 const driversData = [
-  { id: 1, name: "Kwame Mensah", vehicle: "Toyota Corolla", plate: "GR-1234-20", rating: 4.9, rides: 342, status: "Active", earnings: "Gh₵12,500" },
-  { id: 2, name: "Ama Serwaa", vehicle: "Honda Civic", plate: "AS-5678-21", rating: 4.7, rides: 215, status: "Active", earnings: "Gh₵8,200" },
-  { id: 3, name: "Kofi Asante", vehicle: "Hyundai Accent", plate: "BA-9012-22", rating: 4.5, rides: 178, status: "Inactive", earnings: "Gh₵6,400" },
-  { id: 4, name: "Efua Mensah", vehicle: "Kia Rio", plate: "CR-3456-20", rating: 4.8, rides: 290, status: "Active", earnings: "Gh₵10,800" },
-  { id: 5, name: "Yaw Boateng", vehicle: "Toyota Yaris", plate: "GR-7890-21", rating: 4.3, rides: 156, status: "Suspended", earnings: "Gh₵5,100" },
-  { id: 6, name: "Abena Osei", vehicle: "Nissan Versa", plate: "AS-2345-22", rating: 4.6, rides: 203, status: "Active", earnings: "Gh₵7,600" },
-  { id: 7, name: "Nana Agyei", vehicle: "Hyundai Elantra", plate: "BA-6789-20", rating: 4.9, rides: 410, status: "Active", earnings: "Gh₵15,200" },
-  { id: 8, name: "Akua Darko", vehicle: "Honda Fit", plate: "CR-0123-21", rating: 4.4, rides: 132, status: "Pending", earnings: "Gh₵3,800" },
+  { id: 1, name: "Kwame Mensah", vehicle: "Toyota Corolla", plate: "GR-1234-20", rating: 4.9, rides: 342, status: "Active", earnings: "GHS 12,500" },
+  { id: 2, name: "Ama Serwaa", vehicle: "Honda Civic", plate: "AS-5678-21", rating: 4.7, rides: 215, status: "Active", earnings: "GHS 8,200" },
+  { id: 3, name: "Kofi Asante", vehicle: "Hyundai Accent", plate: "BA-9012-22", rating: 4.5, rides: 178, status: "Inactive", earnings: "GHS 6,400" },
+  { id: 4, name: "Efua Mensah", vehicle: "Kia Rio", plate: "CR-3456-20", rating: 4.8, rides: 290, status: "Active", earnings: "GHS 10,800" },
+  { id: 5, name: "Yaw Boateng", vehicle: "Toyota Yaris", plate: "GR-7890-21", rating: 4.3, rides: 156, status: "Suspended", earnings: "GHS 5,100" },
+  { id: 6, name: "Abena Osei", vehicle: "Nissan Versa", plate: "AS-2345-22", rating: 4.6, rides: 203, status: "Active", earnings: "GHS 7,600" },
+  { id: 7, name: "Nana Agyei", vehicle: "Hyundai Elantra", plate: "BA-6789-20", rating: 4.9, rides: 410, status: "Active", earnings: "GHS 15,200" },
+  { id: 8, name: "Akua Darko", vehicle: "Honda Fit", plate: "CR-0123-21", rating: 4.4, rides: 132, status: "Pending", earnings: "GHS 3,800" },
 ];
 
 const statusStyle = (status: string) => {
@@ -46,7 +46,7 @@ const DriversPage = () => {
         <StatsCard icon={Users} label="Total Drivers" value={1222} />
         <StatsCard icon={UserCheck} label="Active Drivers" value={980} />
         <StatsCard icon={Car} label="Online Now" value={45} />
-        <StatsCard icon={DollarSign} label="Total Earnings" value="Gh₵125K" />
+        <StatsCard icon={Banknote} label="Total Earnings" value="GHS 125K" />
       </div>
 
       {/* Filters */}
