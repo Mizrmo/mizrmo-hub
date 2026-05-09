@@ -1,4 +1,5 @@
-import { UserPlus, Users, Car, DollarSign, Eye, MoreVertical, TrendingUp, TrendingDown } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { UserPlus, Users, Car, Banknote, Eye, MoreVertical, TrendingUp, TrendingDown } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, BarChart, Bar, PieChart, Pie, Cell, AreaChart, Area } from "recharts";
 import DashboardHeader from "@/components/DashboardHeader";
 import StatsCard from "@/components/StatsCard";
@@ -44,10 +45,10 @@ const rideTypeData = [
 ];
 
 const activeRides = [
-  { name: "Daniel Asante", amount: "GH¢22.00" },
-  { name: "Diobu Okujagu", amount: "GH¢32.00" },
-  { name: "Lydia Aliyu", amount: "GH¢15.00" },
-  { name: "Daniel Gbobo", amount: "GH¢35.00" },
+  { name: "Daniel Asante", amount: "GHS 22.00" },
+  { name: "Diobu Okujagu", amount: "GHS 32.00" },
+  { name: "Lydia Aliyu", amount: "GHS 15.00" },
+  { name: "Daniel Gbobo", amount: "GHS 35.00" },
 ];
 
 const verifyAccounts = [
@@ -57,6 +58,7 @@ const verifyAccounts = [
 ];
 
 const Dashboard = () => {
+  const navigate = useNavigate();
   return (
     <div>
       <DashboardHeader title="Main Dashboard" subtitle="Dashboard" />
@@ -66,7 +68,7 @@ const Dashboard = () => {
         <StatsCard icon={UserPlus} label="Total Sign Up" value="1,222" trend={{ value: 12, up: true }} />
         <StatsCard icon={Users} label="Active Users" value="987" trend={{ value: 8, up: true }} />
         <StatsCard icon={Car} label="Total Drivers" value="345" trend={{ value: 3, up: false }} />
-        <StatsCard icon={DollarSign} label="Revenue" value="GH¢68K" trend={{ value: 15, up: true }} />
+        <StatsCard icon={Banknote} label="Revenue" value="GHS 68K" trend={{ value: 15, up: true }} />
       </div>
 
       {/* Charts Row 1 */}
@@ -132,14 +134,14 @@ const Dashboard = () => {
           <div className="flex items-center justify-between mb-4">
             <div>
               <h3 className="font-semibold text-foreground">Revenue vs Expenses</h3>
-              <p className="text-sm text-muted-foreground">Monthly overview (GH¢)</p>
+              <p className="text-sm text-muted-foreground">Monthly overview (GHS)</p>
             </div>
           </div>
           <ResponsiveContainer width="100%" height={220}>
             <BarChart data={revenueData} barGap={4}>
               <XAxis dataKey="month" tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" />
               <YAxis tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" tickFormatter={(v) => `${v / 1000}k`} />
-              <Tooltip contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 8 }} formatter={(v: number) => [`GH¢${v.toLocaleString()}`, ""]} />
+              <Tooltip contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 8 }} formatter={(v: number) => [`GHS ${v.toLocaleString()}`, ""]} />
               <Bar dataKey="revenue" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
               <Bar dataKey="expenses" fill="hsl(var(--muted))" radius={[4, 4, 0, 0]} />
             </BarChart>
@@ -188,8 +190,8 @@ const Dashboard = () => {
                   </div>
                   <span className="text-sm text-foreground ml-2">{ride.amount}</span>
                 </div>
-                <Button size="sm" className="rounded-full bg-primary text-primary-foreground hover:bg-primary/90 px-6">
-                  <Eye size={14} className="mr-1" /> View
+                <Button size="icon" className="rounded-full bg-primary text-primary-foreground hover:bg-primary/90 h-8 w-8">
+                  <Eye size={14} />
                 </Button>
               </div>
             ))}
@@ -200,7 +202,12 @@ const Dashboard = () => {
         <div className="bg-card rounded-xl border border-border p-6">
           <div className="flex items-center justify-between mb-4">
             <h3 className="font-semibold text-foreground">Verify Account Details</h3>
-            <button className="text-sm text-primary font-medium">See all</button>
+            <button 
+              onClick={() => navigate("/admin/drivers/pending")}
+              className="text-sm text-primary font-medium hover:underline"
+            >
+              See all
+            </button>
           </div>
           <div className="space-y-3">
             {verifyAccounts.map((account, i) => (

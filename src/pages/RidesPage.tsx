@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Car, MapPin, Clock, DollarSign, ChevronLeft, ChevronRight, Eye } from "lucide-react";
+import { Car, MapPin, Clock, Banknote, ChevronLeft, ChevronRight, Eye } from "lucide-react";
 import DashboardHeader from "@/components/DashboardHeader";
 import StatsCard from "@/components/StatsCard";
 import { Badge } from "@/components/ui/badge";
@@ -13,18 +13,18 @@ import {
 } from "@/components/ui/select";
 
 const activeRides = [
-  { id: "RD-001", rider: "Daniel Asante", driver: "Kwame Mensah", pickup: "Tema Station", dropoff: "Kumasi Adum", fare: "Gh₵125.00", status: "In Progress" },
-  { id: "RD-002", rider: "Samuela Kate", driver: "Ama Serwaa", pickup: "Accra Mall", dropoff: "Legon", fare: "Gh₵35.00", status: "In Progress" },
-  { id: "RD-003", rider: "John Dokubo", driver: "Nana Agyei", pickup: "East Legon", dropoff: "Airport", fare: "Gh₵45.00", status: "Driver Assigned" },
+  { id: "RD-001", rider: "Daniel Asante", driver: "Kwame Mensah", pickup: "Tema Station", dropoff: "Kumasi Adum", fare: "GHS 125.00", status: "In Progress" },
+  { id: "RD-002", rider: "Samuela Kate", driver: "Ama Serwaa", pickup: "Accra Mall", dropoff: "Legon", fare: "GHS 35.00", status: "In Progress" },
+  { id: "RD-003", rider: "John Dokubo", driver: "Nana Agyei", pickup: "East Legon", dropoff: "Airport", fare: "GHS 45.00", status: "Driver Assigned" },
 ];
 
 const ridesHistory = [
-  { id: "RD-100", rider: "Ibiso Okujagu", driver: "Kofi Asante", pickup: "Osu", dropoff: "Cantonments", date: "Sep 30, 2030", fare: "Gh₵28.00", status: "Completed" },
-  { id: "RD-101", rider: "Goinbo Ebizi", driver: "Efua Mensah", pickup: "Tema", dropoff: "Accra Central", date: "Sep 29, 2030", fare: "Gh₵55.00", status: "Completed" },
-  { id: "RD-102", rider: "Aisha Ibrahim", driver: "Yaw Boateng", pickup: "Madina", dropoff: "Circle", date: "Sep 29, 2030", fare: "Gh₵22.00", status: "Cancelled" },
-  { id: "RD-103", rider: "Deborah Goinbo", driver: "Abena Osei", pickup: "Lapaz", dropoff: "Dansoman", date: "Sep 28, 2030", fare: "Gh₵18.00", status: "Completed" },
-  { id: "RD-104", rider: "Philip Olabode", driver: "Akua Darko", pickup: "Spintex", dropoff: "Teshie", date: "Sep 28, 2030", fare: "Gh₵30.00", status: "Completed" },
-  { id: "RD-105", rider: "David Oladipo", driver: "Kwame Mensah", pickup: "Achimota", dropoff: "Legon", date: "Sep 27, 2030", fare: "Gh₵25.00", status: "Refunded" },
+  { id: "RD-100", rider: "Ibiso Okujagu", driver: "Kofi Asante", pickup: "Osu", dropoff: "Cantonments", date: "Sep 30, 2030", fare: "GHS 28.00", status: "Completed" },
+  { id: "RD-101", rider: "Goinbo Ebizi", driver: "Efua Mensah", pickup: "Tema", dropoff: "Accra Central", date: "Sep 29, 2030", fare: "GHS 55.00", status: "Completed" },
+  { id: "RD-102", rider: "Aisha Ibrahim", driver: "Yaw Boateng", pickup: "Madina", dropoff: "Circle", date: "Sep 29, 2030", fare: "GHS 22.00", status: "Cancelled" },
+  { id: "RD-103", rider: "Deborah Goinbo", driver: "Abena Osei", pickup: "Lapaz", dropoff: "Dansoman", date: "Sep 28, 2030", fare: "GHS 18.00", status: "Completed" },
+  { id: "RD-104", rider: "Philip Olabode", driver: "Akua Darko", pickup: "Spintex", dropoff: "Teshie", date: "Sep 28, 2030", fare: "GHS 30.00", status: "Completed" },
+  { id: "RD-105", rider: "David Oladipo", driver: "Kwame Mensah", pickup: "Achimota", dropoff: "Legon", date: "Sep 27, 2030", fare: "GHS 25.00", status: "Refunded" },
 ];
 
 const statusStyle = (status: string) => {
@@ -49,7 +49,7 @@ const RidesPage = () => {
         <StatsCard icon={Car} label="Total Rides" value={8450} />
         <StatsCard icon={MapPin} label="Active Rides" value={3} />
         <StatsCard icon={Clock} label="Avg. Duration" value="25 min" />
-        <StatsCard icon={DollarSign} label="Revenue Today" value="Gh₵12,500" />
+        <StatsCard icon={Banknote} label="Revenue Today" value="GHS 12,500" />
       </div>
 
       <Tabs defaultValue="active" className="space-y-4">

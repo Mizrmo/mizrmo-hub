@@ -14,25 +14,25 @@ import RefundActionDialog from "@/components/finance/RefundActionDialog";
 import SeeAllDialog from "@/components/finance/SeeAllDialog";
 
 const pendingRefunds = [
-  { name: "Daniel Asante", amount: "GH₵125", route: "Tema-Kumasi" },
-  { name: "Daniel Asante", amount: "GH₵125", route: "Tema-Kumasi" },
+  { name: "Daniel Asante", amount: "GHS 125", route: "Tema-Kumasi" },
+  { name: "Daniel Asante", amount: "GHS 125", route: "Tema-Kumasi" },
 ];
 
 const pendingOutflows = [
-  { name: "Daniel Asante", amount: "GH₵125", route: "Tema-Kumasi" },
-  { name: "Daniel Asante", amount: "GH₵125", route: "Tema-Kumasi" },
+  { name: "Daniel Asante", amount: "GHS 125", route: "Tema-Kumasi" },
+  { name: "Daniel Asante", amount: "GHS 125", route: "Tema-Kumasi" },
 ];
 
 const paymentsToday = [
-  { id: "mzpymnt_120", type: "Payment- Transport", amount: "Gh₵500.00", date: "Sep 30, 2030" },
-  { id: "mzpymnt_121", type: "Payment- Transport", amount: "Gh₵350.00", date: "Dec 30, 2030" },
-  { id: "mzpymnt_122", type: "Payment- Transport", amount: "Gh₵700.00", date: "Nov 30, 2030" },
+  { id: "mzpymnt_120", type: "Payment- Transport", amount: "GHS 500.00", date: "Sep 30, 2030" },
+  { id: "mzpymnt_121", type: "Payment- Transport", amount: "GHS 350.00", date: "Dec 30, 2030" },
+  { id: "mzpymnt_122", type: "Payment- Transport", amount: "GHS 700.00", date: "Nov 30, 2030" },
 ];
 
 const toPay = [
-  { id: "mzpymnt_120", type: "Payment- Transport", paidTo: "Daniel Asante", amount: "Gh₵500.00", date: "Sep 30, 2030" },
-  { id: "mzpymnt_121", type: "Payment- Transport", paidTo: "Daniel Asante", amount: "Gh₵500.00", date: "Sep 30, 2030" },
-  { id: "mzpymnt_122", type: "Payment- Transport", paidTo: "Daniel Asante", amount: "Gh₵500.00", date: "Sep 30, 2030" },
+  { id: "mzpymnt_120", type: "Payment- Transport", paidTo: "Daniel Asante", amount: "GHS 500.00", date: "Sep 30, 2030" },
+  { id: "mzpymnt_121", type: "Payment- Transport", paidTo: "Daniel Asante", amount: "GHS 500.00", date: "Sep 30, 2030" },
+  { id: "mzpymnt_122", type: "Payment- Transport", paidTo: "Daniel Asante", amount: "GHS 500.00", date: "Sep 30, 2030" },
 ];
 
 const promotions = [
@@ -59,7 +59,7 @@ const FinancePage = () => {
             <p className="text-xs opacity-80">Sa/Fdksfs</p>
             <p className="text-sm font-medium mt-1">Total Inflows</p>
             <div className="flex items-center justify-between mt-2">
-              <p className="text-2xl font-bold">Gh₵25000</p>
+              <p className="text-2xl font-bold">GHS 25000</p>
               <div className="text-xs opacity-80">Total Revenue</div>
               <ArrowUpRight size={20} className="opacity-80" />
             </div>
@@ -69,7 +69,7 @@ const FinancePage = () => {
         <Card>
           <CardContent className="p-5">
             <div className="flex items-center justify-between mb-4">
-              <p className="text-2xl font-bold text-foreground">Gh₵20,000</p>
+              <p className="text-2xl font-bold text-foreground">GHS 20,000</p>
               <Badge variant="outline" className="text-xs">Today</Badge>
             </div>
             <div className="flex gap-6">
@@ -77,14 +77,14 @@ const FinancePage = () => {
                 <Wallet size={14} className="text-muted-foreground" />
                 <div>
                   <p className="text-[10px] text-muted-foreground">Total Outflows</p>
-                  <p className="text-sm font-semibold text-foreground">Gh₵12,500</p>
+                  <p className="text-sm font-semibold text-foreground">GHS 12,500</p>
                 </div>
               </div>
               <div className="flex items-center gap-2">
                 <TrendingDown size={14} className="text-muted-foreground" />
                 <div>
                   <p className="text-[10px] text-muted-foreground">Pending Outflows</p>
-                  <p className="text-sm font-semibold text-foreground">Gh₵7,500</p>
+                  <p className="text-sm font-semibold text-foreground">GHS 7,500</p>
                 </div>
               </div>
             </div>
@@ -94,7 +94,7 @@ const FinancePage = () => {
         <Card>
           <CardContent className="p-5">
             <div className="flex items-center justify-between mb-4">
-              <p className="text-2xl font-bold text-foreground">Gh₵20,000</p>
+              <p className="text-2xl font-bold text-foreground">GHS 20,000</p>
               <Badge variant="outline" className="text-xs">Commission</Badge>
             </div>
             <div className="flex gap-6">

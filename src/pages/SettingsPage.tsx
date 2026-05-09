@@ -30,7 +30,7 @@ const SettingsPage = () => {
   const [appConfig, setAppConfig] = useState({
     appName: "Mizrmo",
     supportEmail: "support@mizrmo.com",
-    defaultCurrency: "GH¢",
+    defaultCurrency: "GHS",
     commissionRate: "15",
     maxCancelFree: "2",
   });

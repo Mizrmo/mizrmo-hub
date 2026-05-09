@@ -1,9 +1,18 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, createContext, useContext, ReactNode } from "react";
 
-export function useTheme() {
-  const [theme, setTheme] = useState<"light" | "dark">(() => {
+type Theme = "light" | "dark";
+
+interface ThemeContextType {
+  theme: Theme;
+  toggleTheme: () => void;
+}
+
+const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
+
+export function ThemeProvider({ children }: { children: ReactNode }) {
+  const [theme, setTheme] = useState<Theme>(() => {
     if (typeof window !== "undefined") {
-      return (localStorage.getItem("mizrmo-theme") as "light" | "dark") || "light";
+      return (localStorage.getItem("mizrmo-theme") as Theme) || "light";
     }
     return "light";
   });
@@ -22,5 +31,17 @@ export function useTheme() {
     setTheme((prev) => (prev === "light" ? "dark" : "light"));
   }, []);
 
-  return { theme, toggleTheme };
+  return (
+    <ThemeContext.Provider value={{ theme, toggleTheme }}>
+      {children}
+    </ThemeContext.Provider>
+  );
+}
+
+export function useTheme() {
+  const context = useContext(ThemeContext);
+  if (context === undefined) {
+    throw new Error("useTheme must be used within a ThemeProvider");
+  }
+  return context;
 }

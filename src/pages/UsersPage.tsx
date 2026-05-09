@@ -1,4 +1,4 @@
-import { Users, UserCheck, Car, DollarSign, Eye, Pencil, ChevronLeft, ChevronRight } from "lucide-react";
+import { Users, UserCheck, Car, Banknote, Eye, Pencil, ChevronLeft, ChevronRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import DashboardHeader from "@/components/DashboardHeader";
 import StatsCard from "@/components/StatsCard";
@@ -28,7 +28,7 @@ const UsersPage = () => {
         <StatsCard icon={Users} label="Total Users" value={1222} />
         <StatsCard icon={UserCheck} label="Active Users" value={1222} />
         <StatsCard icon={Car} label="Active Carpools" value={2} />
-        <StatsCard icon={DollarSign} label="Total Riders" value={1222} />
+        <StatsCard icon={Banknote} label="Total Riders" value={1222} />
       </div>
 
       {/* Table */}

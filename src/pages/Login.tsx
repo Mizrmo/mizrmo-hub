@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { LoginIllustration } from "@/components/LoginIllustration";
-import mizrmoLogo from "@/assets/mizrmo_logo.png";
+import mizrmoLogo from "@/assets/mizrmo/mizrmo_logo_white.png";
 
 const Login = () => {
   const navigate = useNavigate();

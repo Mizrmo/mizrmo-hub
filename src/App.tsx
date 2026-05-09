@@ -18,37 +18,44 @@ import SupportPage from "./pages/SupportPage";
 import SecurityPage from "./pages/SecurityPage";
 import EmailTemplatesPage from "./pages/EmailTemplatesPage";
 import SettingsPage from "./pages/SettingsPage";
+import PendingDriversPage from "./pages/PendingDriversPage";
+import DriverDetailsPage from "./pages/DriverDetailsPage";
 import NotFound from "./pages/NotFound";
+import { ThemeProvider } from "@/hooks/use-theme";
 
 const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Login />} />
-          <Route element={<DashboardLayout />}>
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/users" element={<UsersPage />} />
-            <Route path="/users/:id" element={<UserDetailPage />} />
-            <Route path="/drivers" element={<DriversPage />} />
-            <Route path="/rides" element={<RidesPage />} />
-            <Route path="/finance" element={<FinancePage />} />
-            <Route path="/documents" element={<DocumentsPage />} />
-            <Route path="/miz-miles" element={<MizMilesPage />} />
-            <Route path="/pricing" element={<PricingPage />} />
-            <Route path="/support" element={<SupportPage />} />
-            <Route path="/security" element={<SecurityPage />} />
-            <Route path="/email-templates" element={<EmailTemplatesPage />} />
-            <Route path="/settings" element={<SettingsPage />} />
-          </Route>
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
-    </TooltipProvider>
+    <ThemeProvider>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<Login />} />
+            <Route element={<DashboardLayout />}>
+              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/users" element={<UsersPage />} />
+              <Route path="/users/:id" element={<UserDetailPage />} />
+              <Route path="/drivers" element={<DriversPage />} />
+              <Route path="/rides" element={<RidesPage />} />
+              <Route path="/finance" element={<FinancePage />} />
+              <Route path="/documents" element={<DocumentsPage />} />
+              <Route path="/miz-miles" element={<MizMilesPage />} />
+              <Route path="/pricing" element={<PricingPage />} />
+              <Route path="/support" element={<SupportPage />} />
+              <Route path="/security" element={<SecurityPage />} />
+              <Route path="/email-templates" element={<EmailTemplatesPage />} />
+              <Route path="/settings" element={<SettingsPage />} />
+              <Route path="/admin/drivers/pending" element={<PendingDriversPage />} />
+              <Route path="/admin/drivers/:id" element={<DriverDetailsPage />} />
+            </Route>
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </BrowserRouter>
+      </TooltipProvider>
+    </ThemeProvider>
   </QueryClientProvider>
 );
 
