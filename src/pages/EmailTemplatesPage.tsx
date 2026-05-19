@@ -1,5 +1,9 @@
 import { useState } from "react";
 import DashboardHeader from "@/components/DashboardHeader";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { useApi } from "@/hooks/use-api";
+import api from "@/lib/api";
 import emailCarRide from "@/assets/email-car-ride.png";
 import emailWelcome from "@/assets/email-welcome.png";
 import emailRating from "@/assets/email-rating.png";
@@ -469,13 +473,23 @@ const templateComponents: Record<string, JSX.Element> = {
 
 const EmailTemplatesPage = () => {
   const [active, setActive] = useState("ride");
+  const [testEmail, setTestEmail] = useState("");
+  const { execute, loading: sending } = useApi();
+
+  const handleTestSend = async () => {
+    if (!testEmail) return;
+    await execute(
+      () => api.post(`/admin/notifications/templates/${active}/test`, { recipientEmail: testEmail }),
+      { successMessage: `Test email sent to ${testEmail}` },
+    );
+  };
 
   return (
     <div>
       <DashboardHeader title="Email Templates" subtitle="Dashboard > Email Templates" />
 
       {/* Tab bar */}
-      <div className="flex flex-wrap gap-2 mb-8">
+      <div className="flex flex-wrap gap-2 mb-6">
         {templates.map((t) => (
           <button
             key={t.key}
@@ -489,6 +503,21 @@ const EmailTemplatesPage = () => {
             {t.label}
           </button>
         ))}
+      </div>
+
+      {/* Test send bar */}
+      <div className="flex items-center gap-3 mb-6 p-4 bg-card rounded-xl border border-border">
+        <span className="text-sm font-medium text-foreground shrink-0">Test send:</span>
+        <Input
+          type="email"
+          placeholder="recipient@example.com"
+          value={testEmail}
+          onChange={(e) => setTestEmail(e.target.value)}
+          className="h-9 max-w-xs bg-secondary border-0 rounded-full text-sm"
+        />
+        <Button size="sm" onClick={handleTestSend} disabled={sending || !testEmail} className="rounded-full">
+          {sending ? "Sending…" : "Send Test"}
+        </Button>
       </div>
 
       {/* Preview */}

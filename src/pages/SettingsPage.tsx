@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import DashboardHeader from "@/components/DashboardHeader";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -6,10 +6,18 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
+import { useApi } from "@/hooks/use-api";
+import api from "@/lib/api";
+import type { SystemConfig } from "@/types/api.types";
 
 const SettingsPage = () => {
   const { toast } = useToast();
+  const { execute, loading: saving } = useApi();
+  const [loadingConfig, setLoadingConfig] = useState(true);
+  const [changedKeys, setChangedKeys] = useState<Set<string>>(new Set());
+
   const [profile, setProfile] = useState({
     name: "Admin User",
     email: "admin@mizrmo.com",
@@ -27,16 +35,47 @@ const SettingsPage = () => {
     rideAlerts: false,
   });
 
-  const [appConfig, setAppConfig] = useState({
-    appName: "Mizrmo",
-    supportEmail: "support@mizrmo.com",
-    defaultCurrency: "GH¢",
-    commissionRate: "15",
-    maxCancelFree: "2",
+  const [appConfig, setAppConfig] = useState<Record<string, string>>({
+    APP_NAME: "Mizrmo",
+    SUPPORT_EMAIL: "support@mizrmo.com",
+    DEFAULT_CURRENCY: "GHS",
+    PLATFORM_COMMISSION_PERCENTAGE: "15",
+    MAX_FREE_CANCELLATIONS: "2",
   });
 
-  const handleSave = () => {
-    toast({ title: "Settings saved", description: "Your changes have been saved successfully." });
+  useEffect(() => {
+    api
+      .get("/admin/config")
+      .then((data: SystemConfig[]) => {
+        if (Array.isArray(data)) {
+          const map: Record<string, string> = {};
+          data.forEach((item) => {
+            map[item.key] = item.value;
+          });
+          setAppConfig((prev) => ({ ...prev, ...map }));
+        }
+      })
+      .catch(() => {})
+      .finally(() => setLoadingConfig(false));
+  }, []);
+
+  const handleConfigChange = (key: string, value: string) => {
+    setAppConfig((prev) => ({ ...prev, [key]: value }));
+    setChangedKeys((prev) => new Set(prev).add(key));
+  };
+
+  const handleSaveConfig = async () => {
+    if (changedKeys.size === 0) {
+      toast({ title: "No changes to save" });
+      return;
+    }
+    for (const key of Array.from(changedKeys)) {
+      await execute(() => api.patch(`/admin/config/${key}`, { value: appConfig[key] }), {
+        errorMessage: `Failed to save ${key}`,
+      });
+    }
+    setChangedKeys(new Set());
+    toast({ title: "Settings saved", description: "All changes have been applied" });
   };
 
   return (
@@ -50,7 +89,6 @@ const SettingsPage = () => {
           <TabsTrigger value="app">App Config</TabsTrigger>
         </TabsList>
 
-        {/* Profile */}
         <TabsContent value="profile">
           <div className="bg-card rounded-xl border border-border p-6 max-w-2xl">
             <div className="flex items-center gap-4 mb-6">
@@ -81,13 +119,12 @@ const SettingsPage = () => {
               </div>
             </div>
             <div className="mt-6 flex gap-3">
-              <Button onClick={handleSave}>Save Changes</Button>
+              <Button onClick={() => toast({ title: "Profile saved" })}>Save Changes</Button>
               <Button variant="outline">Change Password</Button>
             </div>
           </div>
         </TabsContent>
 
-        {/* Notifications */}
         <TabsContent value="notifications">
           <div className="bg-card rounded-xl border border-border p-6 max-w-2xl space-y-5">
             <h3 className="font-semibold text-foreground mb-2">Notification Channels</h3>
@@ -106,7 +143,6 @@ const SettingsPage = () => {
                 />
               </div>
             ))}
-
             <h3 className="font-semibold text-foreground mt-6 mb-2">Alert Types</h3>
             {[
               { key: "newDriverSignup", label: "New Driver Signups" },
@@ -123,36 +159,43 @@ const SettingsPage = () => {
                 />
               </div>
             ))}
-            <Button onClick={handleSave} className="mt-4">Save Preferences</Button>
+            <Button onClick={() => toast({ title: "Notification preferences saved" })} className="mt-4">
+              Save Preferences
+            </Button>
           </div>
         </TabsContent>
 
-        {/* App Config */}
         <TabsContent value="app">
           <div className="bg-card rounded-xl border border-border p-6 max-w-2xl">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <Label>App Name</Label>
-                <Input value={appConfig.appName} onChange={(e) => setAppConfig({ ...appConfig, appName: e.target.value })} className="mt-1" />
+            {loadingConfig ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {[...Array(5)].map((_, i) => (
+                  <Skeleton key={i} className="h-16 rounded-lg" />
+                ))}
               </div>
-              <div>
-                <Label>Support Email</Label>
-                <Input value={appConfig.supportEmail} onChange={(e) => setAppConfig({ ...appConfig, supportEmail: e.target.value })} className="mt-1" />
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {[
+                  { key: "APP_NAME", label: "App Name" },
+                  { key: "SUPPORT_EMAIL", label: "Support Email" },
+                  { key: "DEFAULT_CURRENCY", label: "Default Currency" },
+                  { key: "PLATFORM_COMMISSION_PERCENTAGE", label: "Commission Rate (%)" },
+                  { key: "MAX_FREE_CANCELLATIONS", label: "Free Cancellations / Month" },
+                ].map(({ key, label }) => (
+                  <div key={key}>
+                    <Label>{label}</Label>
+                    <Input
+                      value={appConfig[key] ?? ""}
+                      onChange={(e) => handleConfigChange(key, e.target.value)}
+                      className="mt-1"
+                    />
+                  </div>
+                ))}
               </div>
-              <div>
-                <Label>Default Currency</Label>
-                <Input value={appConfig.defaultCurrency} onChange={(e) => setAppConfig({ ...appConfig, defaultCurrency: e.target.value })} className="mt-1" />
-              </div>
-              <div>
-                <Label>Commission Rate (%)</Label>
-                <Input type="number" value={appConfig.commissionRate} onChange={(e) => setAppConfig({ ...appConfig, commissionRate: e.target.value })} className="mt-1" />
-              </div>
-              <div>
-                <Label>Free Cancellations / Month</Label>
-                <Input type="number" value={appConfig.maxCancelFree} onChange={(e) => setAppConfig({ ...appConfig, maxCancelFree: e.target.value })} className="mt-1" />
-              </div>
-            </div>
-            <Button onClick={handleSave} className="mt-6">Save Configuration</Button>
+            )}
+            <Button onClick={handleSaveConfig} disabled={saving} className="mt-6">
+              {saving ? "Saving…" : "Save Configuration"}
+            </Button>
           </div>
         </TabsContent>
       </Tabs>

@@ -1,185 +1,187 @@
-import { useState } from "react";
-import { Pencil, Eye, ChevronLeft, ChevronRight } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Pencil } from "lucide-react";
 import DashboardHeader from "@/components/DashboardHeader";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Skeleton } from "@/components/ui/skeleton";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
+import { ErrorAlert } from "@/components/ui/error-alert";
+import { useApi } from "@/hooks/use-api";
+import api from "@/lib/api";
+import type { SystemConfig } from "@/types/api.types";
 
-const pricingData = Array.from({ length: 10 }, (_, i) => ({
-  id: i + 1,
-  costKm: "GH₵20.00",
-  costMin: "GH₵15.00",
-  txnFee: "40%",
-  from: "Jan 2024",
-  to: "Dec, 2024",
-}));
+interface FareForm {
+  BASE_RATE_PER_KM: string;
+  MINIMUM_FARE: string;
+  PLATFORM_COMMISSION_PERCENTAGE: string;
+  DRIVER_PAYOUT_PERCENTAGE: string;
+  ROAD_DISTANCE_FACTOR: string;
+  MINIMUM_DISTANCE_KM: string;
+  WAIT_TIME_COST_PER_MIN: string;
+  [key: string]: string;
+}
 
 const PricingPage = () => {
-  const [currentPage, setCurrentPage] = useState(1);
+  const { execute, loading: saving } = useApi();
+  const [settings, setSettings] = useState<FareForm>({
+    BASE_RATE_PER_KM: "",
+    MINIMUM_FARE: "",
+    PLATFORM_COMMISSION_PERCENTAGE: "",
+    DRIVER_PAYOUT_PERCENTAGE: "",
+    ROAD_DISTANCE_FACTOR: "",
+    MINIMUM_DISTANCE_KM: "",
+    WAIT_TIME_COST_PER_MIN: "",
+  });
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [formError, setFormError] = useState("");
+
+  const fetchSettings = async () => {
+    setLoading(true);
+    setError("");
+    try {
+      const data: SystemConfig[] = await api.get("/admin/financials/settings");
+      const map: FareForm = { ...settings };
+      data.forEach((item) => {
+        if (item.key in map) map[item.key] = item.value;
+      });
+      setSettings(map);
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => { fetchSettings(); }, []);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setFormError("");
+    const commission = parseFloat(settings.PLATFORM_COMMISSION_PERCENTAGE);
+    const payout = parseFloat(settings.DRIVER_PAYOUT_PERCENTAGE);
+    if (!isNaN(commission) && !isNaN(payout) && Math.abs(commission + payout - 100) > 0.01) {
+      setFormError("Commission % + Driver payout % must equal 100");
+      return;
+    }
+    await execute(
+      () => api.patch("/admin/financials/settings", {
+        updates: Object.entries(settings)
+          .filter(([, v]) => v !== "")
+          .map(([key, value]) => ({ key, value })),
+      }),
+      {
+        successMessage: "Fare settings updated successfully",
+        onSuccess: () => fetchSettings(),
+      },
+    );
+  };
+
+  const displayFare = settings.BASE_RATE_PER_KM ? `GH₵${parseFloat(settings.BASE_RATE_PER_KM).toFixed(2)}` : "—";
+  const displayKm = settings.BASE_RATE_PER_KM ? `GH₵${parseFloat(settings.BASE_RATE_PER_KM).toFixed(2)}` : "—";
+  const displayMin = settings.WAIT_TIME_COST_PER_MIN ? `GH₵${parseFloat(settings.WAIT_TIME_COST_PER_MIN).toFixed(2)}` : "—";
+  const displayCommission = settings.PLATFORM_COMMISSION_PERCENTAGE ? `${settings.PLATFORM_COMMISSION_PERCENTAGE}%` : "—";
+  const displayPayout = settings.DRIVER_PAYOUT_PERCENTAGE ? `${settings.DRIVER_PAYOUT_PERCENTAGE}%` : "—";
 
   return (
     <div>
       <DashboardHeader title="Pricing" subtitle="Pricing" />
 
-      {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-        <div className="bg-card rounded-xl border border-border p-6">
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <p className="text-2xl font-bold text-foreground">Gh₵20.00</p>
-              <p className="text-sm text-muted-foreground">Base Fare</p>
-            </div>
-            <button className="text-muted-foreground hover:text-primary">
-              <Pencil size={18} />
-            </button>
-          </div>
-          <div className="flex gap-8">
-            <div>
-              <p className="text-xs text-muted-foreground">Cost Per km Distance</p>
-              <p className="text-lg font-bold text-foreground">Gh₵8.00</p>
-            </div>
-            <div>
-              <p className="text-xs text-muted-foreground">Cost Per Min Time</p>
-              <p className="text-lg font-bold text-foreground">Gh₵7.00</p>
-            </div>
-          </div>
+      {loading ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+          <Skeleton className="h-32 rounded-xl" />
+          <Skeleton className="h-32 rounded-xl" />
         </div>
-
-        <div className="bg-card rounded-xl border border-border p-6">
-          <div className="flex items-center justify-between mb-4">
-            <p className="text-2xl font-bold text-foreground">Commission</p>
-            <button className="text-muted-foreground hover:text-primary">
-              <Pencil size={18} />
-            </button>
-          </div>
-          <div className="flex gap-8">
-            <div>
-              <p className="text-xs text-muted-foreground">Driver's Share</p>
-              <p className="text-lg font-bold text-foreground">60%</p>
+      ) : error ? (
+        <ErrorAlert message={error} onRetry={fetchSettings} />
+      ) : (
+        <>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            <div className="bg-card rounded-xl border border-border p-6">
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <p className="text-2xl font-bold text-foreground">{displayFare}</p>
+                  <p className="text-sm text-muted-foreground">Base Fare / km</p>
+                </div>
+                <Pencil size={18} className="text-muted-foreground" />
+              </div>
+              <div className="flex gap-8">
+                <div>
+                  <p className="text-xs text-muted-foreground">Cost Per km Distance</p>
+                  <p className="text-lg font-bold text-foreground">{displayKm}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">Wait Time / min</p>
+                  <p className="text-lg font-bold text-foreground">{displayMin}</p>
+                </div>
+              </div>
             </div>
-            <div>
-              <p className="text-xs text-muted-foreground">mizrmo's Share</p>
-              <p className="text-lg font-bold text-foreground">40%</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Tabs with Table */}
-      <div className="bg-card rounded-xl border border-border p-6">
-        <Tabs defaultValue="all-time">
-          <div className="flex items-center justify-between mb-6">
-            <TabsList className="bg-transparent border-b border-border rounded-none justify-start gap-6 px-0">
-              <TabsTrigger
-                value="all-time"
-                className="rounded-none border-b-2 border-transparent data-[state=active]:border-foreground data-[state=active]:text-foreground data-[state=active]:shadow-none px-1 pb-3 text-muted-foreground"
-              >
-                All Time
-              </TabsTrigger>
-              <TabsTrigger
-                value="set-new"
-                className="rounded-none border-b-2 border-transparent data-[state=active]:border-foreground data-[state=active]:text-foreground data-[state=active]:shadow-none px-1 pb-3 text-muted-foreground"
-              >
-                Set New Fare
-              </TabsTrigger>
-            </TabsList>
-
-            <div className="flex items-center gap-3">
-              <Select defaultValue="2021">
-                <SelectTrigger className="w-28 h-9 rounded-lg border-border text-sm">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="2021">2021</SelectItem>
-                  <SelectItem value="2022">2022</SelectItem>
-                  <SelectItem value="2023">2023</SelectItem>
-                  <SelectItem value="2024">2024</SelectItem>
-                </SelectContent>
-              </Select>
-              <span className="text-sm text-muted-foreground">Showing</span>
-              <Select defaultValue="10">
-                <SelectTrigger className="w-20 h-9 rounded-full bg-primary text-primary-foreground border-0 text-sm font-semibold">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="10">10</SelectItem>
-                  <SelectItem value="25">25</SelectItem>
-                </SelectContent>
-              </Select>
+            <div className="bg-card rounded-xl border border-border p-6">
+              <div className="flex items-center justify-between mb-4">
+                <p className="text-2xl font-bold text-foreground">Commission</p>
+                <Pencil size={18} className="text-muted-foreground" />
+              </div>
+              <div className="flex gap-8">
+                <div>
+                  <p className="text-xs text-muted-foreground">Driver's Share</p>
+                  <p className="text-lg font-bold text-foreground">{displayPayout}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">Mizrmo's Share</p>
+                  <p className="text-lg font-bold text-foreground">{displayCommission}</p>
+                </div>
+              </div>
             </div>
           </div>
 
-          <TabsContent value="all-time">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-border">
-                  <th className="text-left text-sm font-semibold text-foreground px-4 py-3">Price ID</th>
-                  <th className="text-left text-sm font-semibold text-foreground px-4 py-3">Cost/ km Distance</th>
-                  <th className="text-left text-sm font-semibold text-foreground px-4 py-3">Cost/ min time</th>
-                  <th className="text-left text-sm font-semibold text-foreground px-4 py-3">Transaction Fee</th>
-                  <th className="text-left text-sm font-semibold text-foreground px-4 py-3">From</th>
-                  <th className="text-left text-sm font-semibold text-foreground px-4 py-3">To</th>
-                  <th className="text-left text-sm font-semibold text-foreground px-4 py-3">Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                {pricingData.map((p) => (
-                  <tr key={p.id} className="border-b border-border hover:bg-muted/50 transition-colors">
-                    <td className="px-4 py-3 text-sm text-foreground">{p.id}</td>
-                    <td className="px-4 py-3 text-sm text-foreground">{p.costKm}</td>
-                    <td className="px-4 py-3 text-sm text-foreground">{p.costMin}</td>
-                    <td className="px-4 py-3 text-sm text-foreground">{p.txnFee}</td>
-                    <td className="px-4 py-3 text-sm text-foreground">{p.from}</td>
-                    <td className="px-4 py-3 text-sm text-foreground">{p.to}</td>
-                    <td className="px-4 py-3">
-                      <button className="text-primary hover:text-primary/80"><Eye size={18} /></button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </TabsContent>
+          <div className="bg-card rounded-xl border border-border p-6">
+            <Tabs defaultValue="set-new">
+              <TabsList className="bg-transparent border-b border-border rounded-none justify-start gap-6 px-0 mb-6">
+                <TabsTrigger
+                  value="set-new"
+                  className="rounded-none border-b-2 border-transparent data-[state=active]:border-foreground data-[state=active]:text-foreground data-[state=active]:shadow-none px-1 pb-3 text-muted-foreground"
+                >
+                  Update Fare Settings
+                </TabsTrigger>
+              </TabsList>
 
-          <TabsContent value="set-new">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label className="text-sm font-medium text-foreground mb-2 block">Minimum Estimated Distance</label>
-                <Input placeholder="example: 5km" className="h-12 bg-secondary border-0 rounded-lg" />
-              </div>
-              <div>
-                <label className="text-sm font-medium text-foreground mb-2 block">Minimum Estimated Time</label>
-                <Input placeholder="example: 30mins" className="h-12 bg-secondary border-0 rounded-lg" />
-              </div>
-              <div>
-                <label className="text-sm font-medium text-foreground mb-2 block">Cost/ km Distance</label>
-                <Input placeholder="example: GH₵10.00" className="h-12 bg-secondary border-0 rounded-lg" />
-              </div>
-              <div>
-                <label className="text-sm font-medium text-foreground mb-2 block">Cost/ minute Time</label>
-                <Input placeholder="example: GH₵20.00" className="h-12 bg-secondary border-0 rounded-lg" />
-              </div>
-              <div>
-                <label className="text-sm font-medium text-foreground mb-2 block">Transaction Fee %</label>
-                <Input placeholder="example: 40%" className="h-12 bg-secondary border-0 rounded-lg" />
-              </div>
-              <div>
-                <label className="text-sm font-medium text-foreground mb-2 block">Wait Time Cost Per Min</label>
-                <Input placeholder="example: GH₵2.00" className="h-12 bg-secondary border-0 rounded-lg" />
-              </div>
-            </div>
-            <div className="flex justify-center mt-8">
-              <Button className="rounded-full px-16 h-12 text-base font-semibold">Submit</Button>
-            </div>
-          </TabsContent>
-        </Tabs>
-      </div>
+              <TabsContent value="set-new">
+                <form onSubmit={handleSubmit}>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {[
+                      { key: "MINIMUM_DISTANCE_KM", label: "Minimum Estimated Distance (km)" },
+                      { key: "WAIT_TIME_COST_PER_MIN", label: "Wait Time Cost Per Min (GH₵)" },
+                      { key: "BASE_RATE_PER_KM", label: "Cost / km Distance (GH₵)" },
+                      { key: "MINIMUM_FARE", label: "Minimum Fare (GH₵)" },
+                      { key: "PLATFORM_COMMISSION_PERCENTAGE", label: "Platform Commission (%)" },
+                      { key: "DRIVER_PAYOUT_PERCENTAGE", label: "Driver Payout (%)" },
+                    ].map(({ key, label }) => (
+                      <div key={key}>
+                        <label className="text-sm font-medium text-foreground mb-2 block">{label}</label>
+                        <Input
+                          type="number"
+                          step="0.01"
+                          placeholder={`Current: ${settings[key] || "not set"}`}
+                          value={settings[key]}
+                          onChange={(e) => setSettings((prev) => ({ ...prev, [key]: e.target.value }))}
+                          className="h-12 bg-secondary border-0 rounded-lg"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                  {formError && <p className="mt-4 text-sm text-destructive">{formError}</p>}
+                  <div className="flex justify-center mt-8">
+                    <Button type="submit" disabled={saving} className="rounded-full px-16 h-12 text-base font-semibold">
+                      {saving ? "Saving…" : "Submit"}
+                    </Button>
+                  </div>
+                </form>
+              </TabsContent>
+            </Tabs>
+          </div>
+        </>
+      )}
     </div>
   );
 };
