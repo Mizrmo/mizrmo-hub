@@ -28,6 +28,24 @@ const templates = [
   { key: "locked", label: "Account Locked" },
 ];
 
+// These local keys are only used for switching the preview UI below.
+// The backend's email template registry (and EmailTemplate DB rows) use a
+// different, unrelated set of uppercase keys - map to those for API calls.
+const BACKEND_TEMPLATE_KEYS: Record<string, string> = {
+  ride: "RIDE_COMPLETED",
+  welcome: "WELCOME",
+  payment: "PAYMENT_RECEIPT",
+  rate: "RATE_DRIVER",
+  promo: "PROMOTIONAL_OFFER",
+  safety: "SAFETY_UPDATE",
+  booking: "BOOKING_CONFIRMED",
+  loyalty: "LOYALTY_MILESTONE",
+  reset: "PASSWORD_RESET",
+  verify: "EMAIL_VERIFICATION",
+  pwdchanged: "PASSWORD_CHANGED",
+  locked: "ACCOUNT_LOCKED",
+};
+
 /* ── Shared inline styles ─────────────────────────────────── */
 const S = {
   mail: { fontFamily: "'Inter', Arial, sans-serif", maxWidth: 520, margin: "0 auto", background: "#fff", borderRadius: 20, overflow: "hidden" as const, boxShadow: "0 8px 40px rgba(0,56,179,0.10)" },
@@ -478,8 +496,9 @@ const EmailTemplatesPage = () => {
 
   const handleTestSend = async () => {
     if (!testEmail) return;
+    const backendKey = BACKEND_TEMPLATE_KEYS[active];
     await execute(
-      () => api.post(`/admin/notifications/templates/${active}/test`, { recipientEmail: testEmail }),
+      () => api.post(`/admin/notifications/templates/${backendKey}/test`, { to: testEmail }),
       { successMessage: `Test email sent to ${testEmail}` },
     );
   };
