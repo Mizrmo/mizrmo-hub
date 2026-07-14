@@ -41,9 +41,13 @@ const PricingPage = () => {
     setLoading(true);
     setError("");
     try {
-      const data: SystemConfig[] = await api.get("/admin/financials/settings");
+      // GET /admin/financials/settings returns { fare: [...], commission: [...] }
+      // grouped by config category, not a flat array.
+      const data: { fare: SystemConfig[]; commission: SystemConfig[] } = await api.get(
+        "/admin/financials/settings"
+      );
       const map: FareForm = { ...settings };
-      data.forEach((item) => {
+      [...(data.fare ?? []), ...(data.commission ?? [])].forEach((item) => {
         if (item.key in map) map[item.key] = item.value;
       });
       setSettings(map);
