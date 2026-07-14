@@ -235,7 +235,21 @@ const FinancePage = () => {
 
       <AddPromotionDialog open={promoOpen} onOpenChange={setPromoOpen} />
       <ViewPaymentDialog open={!!viewPayment} onOpenChange={(o) => !o && setViewPayment(null)} payment={viewPayment} />
-      <PayDriverDialog open={!!payDriver} onOpenChange={(o) => !o && setPayDriver(null)} item={payDriver} />
+      <PayDriverDialog
+        open={!!payDriver}
+        onOpenChange={(o) => !o && setPayDriver(null)}
+        item={
+          payDriver
+            ? {
+                id: payDriver.id,
+                type: "Payout",
+                paidTo: `${payDriver.driver.firstName} ${payDriver.driver.lastName}`,
+                amount: String(payDriver.totalAmount),
+                date: payDriver.processedAt ?? payDriver.weekIdentifier,
+              }
+            : null
+        }
+      />
       <SetFareDialog open={fareOpen} onOpenChange={setFareOpen} />
       <RefundActionDialog open={!!refundItem} onOpenChange={(o) => !o && setRefundItem(null)} refund={refundItem} />
       <SeeAllDialog open={!!seeAll} onOpenChange={(o) => !o && setSeeAll(null)} title={seeAll?.title ?? ""} type={seeAll?.type ?? "refunds"} />
