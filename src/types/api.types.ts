@@ -305,3 +305,30 @@ export interface EmailTemplate {
   isActive: boolean;
   lastTestedAt: string | null;
 }
+
+// Disputes
+export type DisputeStatus = 'OPEN' | 'UNDER_REVIEW' | 'RESOLVED' | 'DISMISSED';
+
+export interface Dispute {
+  id: string;
+  tripId: string;
+  bookingId: string | null;
+  disputeType: string;
+  description: string;
+  status: DisputeStatus;
+  resolution: string | null;
+  createdAt: string;
+  resolvedAt: string | null;
+  raisedByUser: {
+    id: string;
+    firstName: string;
+    lastName: string;
+  };
+}
+
+export interface DisputeListResponse {
+  items: Dispute[];
+  total: number;
+  page: number;
+  limit: number;
+}
