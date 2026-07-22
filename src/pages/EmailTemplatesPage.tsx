@@ -1,5 +1,9 @@
 import { useState } from "react";
 import DashboardHeader from "@/components/DashboardHeader";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { useApi } from "@/hooks/use-api";
+import api from "@/lib/api";
 import emailCarRide from "@/assets/email-car-ride.png";
 import emailWelcome from "@/assets/email-welcome.png";
 import emailRating from "@/assets/email-rating.png";
@@ -23,6 +27,24 @@ const templates = [
   { key: "pwdchanged", label: "Password Changed" },
   { key: "locked", label: "Account Locked" },
 ];
+
+// These local keys are only used for switching the preview UI below.
+// The backend's email template registry (and EmailTemplate DB rows) use a
+// different, unrelated set of uppercase keys - map to those for API calls.
+const BACKEND_TEMPLATE_KEYS: Record<string, string> = {
+  ride: "RIDE_COMPLETED",
+  welcome: "WELCOME",
+  payment: "PAYMENT_RECEIPT",
+  rate: "RATE_DRIVER",
+  promo: "PROMOTIONAL_OFFER",
+  safety: "SAFETY_UPDATE",
+  booking: "BOOKING_CONFIRMED",
+  loyalty: "LOYALTY_MILESTONE",
+  reset: "PASSWORD_RESET",
+  verify: "EMAIL_VERIFICATION",
+  pwdchanged: "PASSWORD_CHANGED",
+  locked: "ACCOUNT_LOCKED",
+};
 
 /* ── Shared inline styles ─────────────────────────────────── */
 const S = {
@@ -469,13 +491,24 @@ const templateComponents: Record<string, JSX.Element> = {
 
 const EmailTemplatesPage = () => {
   const [active, setActive] = useState("ride");
+  const [testEmail, setTestEmail] = useState("");
+  const { execute, loading: sending } = useApi();
+
+  const handleTestSend = async () => {
+    if (!testEmail) return;
+    const backendKey = BACKEND_TEMPLATE_KEYS[active];
+    await execute(
+      () => api.post(`/admin/notifications/templates/${backendKey}/test`, { to: testEmail }),
+      { successMessage: `Test email sent to ${testEmail}` },
+    );
+  };
 
   return (
     <div>
       <DashboardHeader title="Email Templates" subtitle="Dashboard > Email Templates" />
 
       {/* Tab bar */}
-      <div className="flex flex-wrap gap-2 mb-8">
+      <div className="flex flex-wrap gap-2 mb-6">
         {templates.map((t) => (
           <button
             key={t.key}
@@ -489,6 +522,21 @@ const EmailTemplatesPage = () => {
             {t.label}
           </button>
         ))}
+      </div>
+
+      {/* Test send bar */}
+      <div className="flex items-center gap-3 mb-6 p-4 bg-card rounded-xl border border-border">
+        <span className="text-sm font-medium text-foreground shrink-0">Test send:</span>
+        <Input
+          type="email"
+          placeholder="recipient@example.com"
+          value={testEmail}
+          onChange={(e) => setTestEmail(e.target.value)}
+          className="h-9 max-w-xs bg-secondary border-0 rounded-full text-sm"
+        />
+        <Button size="sm" onClick={handleTestSend} disabled={sending || !testEmail} className="rounded-full">
+          {sending ? "Sending…" : "Send Test"}
+        </Button>
       </div>
 
       {/* Preview */}

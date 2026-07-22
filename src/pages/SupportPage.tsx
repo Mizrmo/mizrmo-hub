@@ -1,121 +1,120 @@
-import { useState } from "react";
-import { MessageSquare, CheckCircle, Clock, ChevronLeft, ChevronRight, Eye } from "lucide-react";
+import { useState, useEffect } from "react";
+import { MessageSquare, CheckCircle, Clock, ChevronLeft, ChevronRight } from "lucide-react";
 import DashboardHeader from "@/components/DashboardHeader";
 import StatsCard from "@/components/StatsCard";
-import { Badge } from "@/components/ui/badge";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-
-const reports = [
-  { id: 1, user: "Ifechukwu Anozie", type: "Driver Behaviour", issue: "The promo is applied automatically when users meet...", date: "Sep 30, 2030", status: "Resolved" },
-  { id: 2, user: "Gbegba Bozimo", type: "App Issue", issue: "The promo is applied automatically when users meet...", date: "Dec 31, 2030", status: "Resolved" },
-  { id: 3, user: "Ibim Tamuno", type: "Passenger Behaviour", issue: "The promo is applied automatically when users meet...", date: "Jan 01, 2030", status: "Resolved" },
-  { id: 4, user: "Esther Ogan", type: "Ride Quality", issue: "The promo is applied automatically when users meet...", date: "Mar 06, 2030", status: "Resolved" },
-  { id: 5, user: "Mary Ige", type: "Driver Behaviour", issue: "The promo is applied automatically when users meet...", date: "Jun 16, 2030", status: "Resolved" },
-  { id: 6, user: "Hannah Nwabueze", type: "Driver Behaviour", issue: "The promo is applied automatically when users meet...", date: "Aug 04, 2030", status: "Resolved" },
-];
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
+import { ErrorAlert } from "@/components/ui/error-alert";
+import { EmptyState } from "@/components/ui/empty-state";
+import { StatusBadge } from "@/components/ui/status-badge";
+import api from "@/lib/api";
+import type { SupportTicket, DashboardStats } from "@/types/api.types";
 
 const SupportPage = () => {
-  const [currentPage, setCurrentPage] = useState(1);
+  const [tickets, setTickets] = useState<SupportTicket[]>([]);
+  const [stats, setStats] = useState<DashboardStats | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [statusFilter, setStatusFilter] = useState("");
+
+  const fetchTickets = async () => {
+    setLoading(true);
+    setError("");
+    try {
+      const params = new URLSearchParams({
+        page: String(page),
+        limit: "20",
+        ...(statusFilter && { status: statusFilter }),
+      });
+      const [ticketsData, statsData] = await Promise.all([
+        api.get(`/admin/support/tickets?${params}`),
+        stats ? Promise.resolve(null) : api.get("/admin/stats"),
+      ]);
+      setTickets(ticketsData.data ?? ticketsData);
+      setTotalPages(ticketsData.meta?.totalPages ?? 1);
+      if (statsData) setStats(statsData);
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => { fetchTickets(); }, [page, statusFilter]);
 
   return (
     <div>
       <DashboardHeader title="Support & Communication" subtitle="Support & Communication" />
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
-        <StatsCard icon={MessageSquare} label="Total Complaints" value={1222} />
-        <StatsCard icon={CheckCircle} label="Total Resolved" value={1222} />
-        <StatsCard icon={Clock} label="Pending" value={1222} />
+        <StatsCard icon={MessageSquare} label="Open Tickets" value={stats?.totalOpenSupportTickets?.toLocaleString() ?? "—"} />
+        <StatsCard icon={CheckCircle} label="Unassigned" value={stats?.totalUnassignedTickets?.toLocaleString() ?? "—"} />
+        <StatsCard icon={Clock} label="Urgent" value={stats?.totalUrgentSupportTickets?.toLocaleString() ?? "—"} />
       </div>
 
-      {/* Filters */}
       <div className="flex items-center gap-4 mb-4">
-        <span className="text-sm text-muted-foreground">Showing</span>
-        <Select defaultValue="10">
-          <SelectTrigger className="w-20 h-9 rounded-full bg-primary text-primary-foreground border-0 text-sm font-semibold">
-            <SelectValue />
+        <Select value={statusFilter} onValueChange={(v) => { setStatusFilter(v === "ALL" ? "" : v); setPage(1); }}>
+          <SelectTrigger className="w-40 h-9 rounded-lg border-border text-sm">
+            <SelectValue placeholder="All Statuses" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="10">10</SelectItem>
-            <SelectItem value="25">25</SelectItem>
-            <SelectItem value="50">50</SelectItem>
-          </SelectContent>
-        </Select>
-        <Select>
-          <SelectTrigger className="w-36 h-9 rounded-lg border-border text-sm">
-            <SelectValue placeholder="Category" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All</SelectItem>
-            <SelectItem value="driver">Driver Behaviour</SelectItem>
-            <SelectItem value="app">App Issue</SelectItem>
-            <SelectItem value="passenger">Passenger Behaviour</SelectItem>
-            <SelectItem value="ride">Ride Quality</SelectItem>
+            <SelectItem value="ALL">All</SelectItem>
+            <SelectItem value="OPEN">Open</SelectItem>
+            <SelectItem value="IN_PROGRESS">In Progress</SelectItem>
+            <SelectItem value="RESOLVED">Resolved</SelectItem>
+            <SelectItem value="CLOSED">Closed</SelectItem>
           </SelectContent>
         </Select>
       </div>
 
-      {/* Table */}
       <div className="bg-card rounded-xl border border-border overflow-hidden">
-        <table className="w-full">
-          <thead>
-            <tr className="border-b border-border">
-              <th className="text-left text-sm font-semibold text-foreground px-6 py-3">Report ID</th>
-              <th className="text-left text-sm font-semibold text-foreground px-6 py-3">User</th>
-              <th className="text-left text-sm font-semibold text-foreground px-6 py-3">Type</th>
-              <th className="text-left text-sm font-semibold text-foreground px-6 py-3">Issue</th>
-              <th className="text-left text-sm font-semibold text-foreground px-6 py-3">Submitted On</th>
-              <th className="text-left text-sm font-semibold text-foreground px-6 py-3">Status</th>
-              <th className="text-left text-sm font-semibold text-foreground px-6 py-3">Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            {reports.map((r) => (
-              <tr key={r.id} className="border-b border-border hover:bg-muted/50 transition-colors">
-                <td className="px-6 py-3">
-                  <div className="flex items-center gap-2">
-                    <div className="w-1 h-8 rounded-full bg-accent" />
-                    <span className="text-sm text-foreground">{r.id}</span>
-                  </div>
-                </td>
-                <td className="px-6 py-3 text-sm text-foreground">{r.user}</td>
-                <td className="px-6 py-3 text-sm text-foreground">{r.type}</td>
-                <td className="px-6 py-3 text-sm text-muted-foreground max-w-[200px] truncate">{r.issue}</td>
-                <td className="px-6 py-3 text-sm text-foreground">{r.date}</td>
-                <td className="px-6 py-3">
-                  <Badge className="bg-success/10 text-success border-0 hover:bg-success/20">{r.status}</Badge>
-                </td>
-                <td className="px-6 py-3">
-                  <button className="text-primary text-sm font-medium hover:underline">View</button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        {loading ? (
+          <LoadingSpinner message="Loading tickets..." />
+        ) : error ? (
+          <ErrorAlert message={error} onRetry={fetchTickets} />
+        ) : tickets.length === 0 ? (
+          <EmptyState title="No tickets found" description="Try changing the status filter." />
+        ) : (
+          <>
+            <table className="w-full">
+              <thead>
+                <tr className="border-b border-border">
+                  <th className="text-left text-sm font-semibold text-foreground px-6 py-3">User</th>
+                  <th className="text-left text-sm font-semibold text-foreground px-6 py-3">Category</th>
+                  <th className="text-left text-sm font-semibold text-foreground px-6 py-3">Subject</th>
+                  <th className="text-left text-sm font-semibold text-foreground px-6 py-3">Submitted</th>
+                  <th className="text-left text-sm font-semibold text-foreground px-6 py-3">Priority</th>
+                  <th className="text-left text-sm font-semibold text-foreground px-6 py-3">Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {tickets.map((r) => (
+                  <tr key={r.id} className={`border-b border-border hover:bg-muted/50 transition-colors ${r.isOverdue ? "bg-destructive/5" : ""}`}>
+                    <td className="px-6 py-3 text-sm text-foreground">
+                      {r.user?.firstName} {r.user?.lastName}
+                    </td>
+                    <td className="px-6 py-3 text-sm text-foreground">{r.category}</td>
+                    <td className="px-6 py-3 text-sm text-muted-foreground max-w-[200px] truncate">{r.subject}</td>
+                    <td className="px-6 py-3 text-sm text-foreground">{new Date(r.createdAt).toLocaleDateString()}</td>
+                    <td className="px-6 py-3"><StatusBadge status={r.priority} size="sm" /></td>
+                    <td className="px-6 py-3"><StatusBadge status={r.status} size="sm" /></td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
 
-        <div className="px-6 py-4 flex items-center justify-between border-t border-border">
-          <p className="text-sm text-muted-foreground">Showing 1 to 8 out of 60 records</p>
-          <div className="flex items-center gap-2">
-            <button className="p-1 text-muted-foreground hover:text-foreground"><ChevronLeft size={18} /></button>
-            {[1, 2, 3].map((page) => (
-              <button
-                key={page}
-                onClick={() => setCurrentPage(page)}
-                className={`w-8 h-8 rounded-full text-sm font-medium transition-colors ${
-                  currentPage === page ? "bg-primary text-primary-foreground" : "text-primary hover:bg-primary/10"
-                }`}
-              >
-                {page}
-              </button>
-            ))}
-            <button className="p-1 text-muted-foreground hover:text-foreground"><ChevronRight size={18} /></button>
-          </div>
-        </div>
+            <div className="px-6 py-4 flex items-center justify-between border-t border-border">
+              <p className="text-sm text-muted-foreground">Page {page} of {totalPages}</p>
+              <div className="flex items-center gap-2">
+                <button disabled={page <= 1} onClick={() => setPage((p) => p - 1)} className="p-1 text-muted-foreground hover:text-foreground disabled:opacity-40"><ChevronLeft size={18} /></button>
+                <span className="w-8 h-8 rounded-full text-sm font-medium bg-primary text-primary-foreground flex items-center justify-center">{page}</span>
+                <button disabled={page >= totalPages} onClick={() => setPage((p) => p + 1)} className="p-1 text-muted-foreground hover:text-foreground disabled:opacity-40"><ChevronRight size={18} /></button>
+              </div>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );

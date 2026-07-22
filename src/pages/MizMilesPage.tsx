@@ -1,27 +1,21 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Heart, Award, Gift, TrendingUp, ChevronLeft, ChevronRight, Star } from "lucide-react";
 import DashboardHeader from "@/components/DashboardHeader";
 import StatsCard from "@/components/StatsCard";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
+import { EmptyState } from "@/components/ui/empty-state";
+import api from "@/lib/api";
+import type { MizMilesOverview } from "@/types/api.types";
 
 const tiers = [
   { name: "Bronze", minMiles: 0, maxMiles: 500, color: "bg-orange-400", benefits: ["1% fare discount", "Birthday bonus miles"] },
   { name: "Silver", minMiles: 500, maxMiles: 1500, color: "bg-gray-400", benefits: ["3% fare discount", "Priority support", "1 free cancel/month"] },
   { name: "Gold", minMiles: 1500, maxMiles: 3000, color: "bg-yellow-500", benefits: ["5% fare discount", "Priority matching", "3 free cancels/month"] },
   { name: "Platinum", minMiles: 3000, maxMiles: 5000, color: "bg-blue-500", benefits: ["10% fare discount", "VIP support", "5 free cancels/month", "Airport lounge access"] },
-];
-
-const recentActivity = [
-  { user: "Daniel Asante", action: "Earned 15 miles", type: "Ride Completion", date: "Sep 30, 2030", miles: "+15" },
-  { user: "Samuela Kate", action: "Redeemed 200 miles", type: "Fare Discount", date: "Sep 29, 2030", miles: "-200" },
-  { user: "John Dokubo", action: "Earned 12 miles", type: "Ride Completion", date: "Sep 29, 2030", miles: "+12" },
-  { user: "Ibiso Okujagu", action: "Earned 50 miles", type: "Referral Bonus", date: "Sep 28, 2030", miles: "+50" },
-  { user: "Goinbo Ebizi", action: "Redeemed 500 miles", type: "Free Ride", date: "Sep 28, 2030", miles: "-500" },
-  { user: "Aisha Ibrahim", action: "Earned 8 miles", type: "Ride Completion", date: "Sep 27, 2030", miles: "+8" },
 ];
 
 const redemptionOptions = [
@@ -33,93 +27,119 @@ const redemptionOptions = [
   { name: "Weekend Pass", miles: 2000, description: "Unlimited rides for one weekend" },
 ];
 
+interface WalletEntry {
+  id: string;
+  balance: number;
+  totalEarned: number;
+  totalRedeemed: number;
+  user: { firstName: string; lastName: string; email: string };
+}
+
 const MizMilesPage = () => {
-  const [currentPage, setCurrentPage] = useState(1);
+  const [overview, setOverview] = useState<MizMilesOverview | null>(null);
+  const [wallets, setWallets] = useState<WalletEntry[]>([]);
+  const [loadingOverview, setLoadingOverview] = useState(true);
+  const [loadingWallets, setLoadingWallets] = useState(true);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+
+  useEffect(() => {
+    api.get("/admin/miz-miles/overview")
+      .then((data) => setOverview(data))
+      .catch(() => {})
+      .finally(() => setLoadingOverview(false));
+  }, []);
+
+  useEffect(() => {
+    api.get(`/admin/miz-miles/wallets?page=${page}&limit=20`)
+      .then((data) => {
+        setWallets(Array.isArray(data) ? data : (data?.data ?? []));
+        setTotalPages(data?.meta?.totalPages ?? 1);
+      })
+      .catch(() => {})
+      .finally(() => setLoadingWallets(false));
+  }, [page]);
 
   return (
     <div>
       <DashboardHeader title="Miz Miles" subtitle="Dashboard > Miz Miles" />
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-        <StatsCard icon={Heart} label="Total Miles Issued" value="125,000" />
-        <StatsCard icon={Gift} label="Miles Redeemed" value="45,000" />
-        <StatsCard icon={TrendingUp} label="Active Members" value={2340} />
-        <StatsCard icon={Award} label="Gold+ Members" value={185} />
+        <StatsCard icon={Heart} label="Total Miles Issued" value={overview?.totalMilesEverAwarded?.toLocaleString() ?? "—"} />
+        <StatsCard icon={Gift} label="Miles Redeemed" value={overview?.totalMilesRedeemed?.toLocaleString() ?? "—"} />
+        <StatsCard icon={TrendingUp} label="Active Members" value={overview?.usersWithBalance?.toLocaleString() ?? "—"} />
+        <StatsCard icon={Award} label="Active Promos" value={overview?.totalActivePromotions?.toLocaleString() ?? "—"} />
       </div>
 
       <Tabs defaultValue="activity" className="space-y-6">
         <TabsList className="bg-transparent border-b border-border rounded-none justify-start gap-6 px-0">
-          <TabsTrigger value="activity" className="rounded-none border-b-2 border-transparent data-[state=active]:border-foreground data-[state=active]:text-foreground data-[state=active]:shadow-none px-1 pb-3 text-muted-foreground">
-            Activity
-          </TabsTrigger>
-          <TabsTrigger value="tiers" className="rounded-none border-b-2 border-transparent data-[state=active]:border-foreground data-[state=active]:text-foreground data-[state=active]:shadow-none px-1 pb-3 text-muted-foreground">
-            Tiers
-          </TabsTrigger>
-          <TabsTrigger value="redemption" className="rounded-none border-b-2 border-transparent data-[state=active]:border-foreground data-[state=active]:text-foreground data-[state=active]:shadow-none px-1 pb-3 text-muted-foreground">
-            Redemption Options
-          </TabsTrigger>
+          {["activity", "tiers", "redemption"].map((tab) => (
+            <TabsTrigger
+              key={tab}
+              value={tab}
+              className="rounded-none border-b-2 border-transparent data-[state=active]:border-foreground data-[state=active]:text-foreground data-[state=active]:shadow-none px-1 pb-3 text-muted-foreground capitalize"
+            >
+              {tab === "activity" ? "Wallet Overview" : tab === "redemption" ? "Redemption Options" : "Tiers"}
+            </TabsTrigger>
+          ))}
         </TabsList>
 
-        {/* Activity Tab */}
         <TabsContent value="activity">
-          <div className="bg-card rounded-xl border border-border overflow-hidden">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-border">
-                  <th className="text-left text-sm font-semibold text-foreground px-6 py-3">User</th>
-                  <th className="text-left text-sm font-semibold text-foreground px-6 py-3">Action</th>
-                  <th className="text-left text-sm font-semibold text-foreground px-6 py-3">Type</th>
-                  <th className="text-left text-sm font-semibold text-foreground px-6 py-3">Date</th>
-                  <th className="text-left text-sm font-semibold text-foreground px-6 py-3">Miles</th>
-                </tr>
-              </thead>
-              <tbody>
-                {recentActivity.map((a, i) => (
-                  <tr key={i} className="border-b border-border hover:bg-muted/50 transition-colors">
-                    <td className="px-6 py-3 text-sm font-medium text-foreground">{a.user}</td>
-                    <td className="px-6 py-3 text-sm text-foreground">{a.action}</td>
-                    <td className="px-6 py-3">
-                      <Badge variant="outline" className="text-xs">{a.type}</Badge>
-                    </td>
-                    <td className="px-6 py-3 text-sm text-muted-foreground">{a.date}</td>
-                    <td className="px-6 py-3">
-                      <span className={`text-sm font-semibold ${a.miles.startsWith("+") ? "text-success" : "text-destructive"}`}>
-                        {a.miles}
-                      </span>
-                    </td>
+          {loadingWallets ? (
+            <LoadingSpinner message="Loading wallets..." />
+          ) : wallets.length === 0 ? (
+            <EmptyState title="No wallet data" description="No users have Miz Miles yet." />
+          ) : (
+            <div className="bg-card rounded-xl border border-border overflow-hidden">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b border-border">
+                    <th className="text-left text-sm font-semibold text-foreground px-6 py-3">User</th>
+                    <th className="text-left text-sm font-semibold text-foreground px-6 py-3">Email</th>
+                    <th className="text-left text-sm font-semibold text-foreground px-6 py-3">Balance</th>
+                    <th className="text-left text-sm font-semibold text-foreground px-6 py-3">Total Earned</th>
+                    <th className="text-left text-sm font-semibold text-foreground px-6 py-3">Total Redeemed</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-            <div className="px-6 py-4 flex items-center justify-between border-t border-border">
-              <p className="text-sm text-muted-foreground">Showing 1 to 6 out of 120 records</p>
-              <div className="flex items-center gap-2">
-                <button className="p-1 text-muted-foreground hover:text-foreground"><ChevronLeft size={18} /></button>
-                {[1, 2, 3].map((page) => (
-                  <button key={page} onClick={() => setCurrentPage(page)} className={`w-8 h-8 rounded-full text-sm font-medium transition-colors ${currentPage === page ? "bg-primary text-primary-foreground" : "text-primary hover:bg-primary/10"}`}>{page}</button>
-                ))}
-                <button className="p-1 text-muted-foreground hover:text-foreground"><ChevronRight size={18} /></button>
+                </thead>
+                <tbody>
+                  {wallets.map((w) => (
+                    <tr key={w.id} className="border-b border-border hover:bg-muted/50 transition-colors">
+                      <td className="px-6 py-3 text-sm font-medium text-foreground">{w.user?.firstName} {w.user?.lastName}</td>
+                      <td className="px-6 py-3 text-sm text-muted-foreground">{w.user?.email}</td>
+                      <td className="px-6 py-3">
+                        <span className="text-sm font-semibold text-primary">{w.balance?.toLocaleString()} miles</span>
+                      </td>
+                      <td className="px-6 py-3 text-sm text-success">+{w.totalEarned?.toLocaleString()}</td>
+                      <td className="px-6 py-3 text-sm text-destructive">-{w.totalRedeemed?.toLocaleString()}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              <div className="px-6 py-4 flex items-center justify-between border-t border-border">
+                <p className="text-sm text-muted-foreground">Page {page} of {totalPages}</p>
+                <div className="flex items-center gap-2">
+                  <button disabled={page <= 1} onClick={() => setPage((p) => p - 1)} className="p-1 text-muted-foreground hover:text-foreground disabled:opacity-40"><ChevronLeft size={18} /></button>
+                  <span className="w-8 h-8 rounded-full text-sm font-medium bg-primary text-primary-foreground flex items-center justify-center">{page}</span>
+                  <button disabled={page >= totalPages} onClick={() => setPage((p) => p + 1)} className="p-1 text-muted-foreground hover:text-foreground disabled:opacity-40"><ChevronRight size={18} /></button>
+                </div>
               </div>
             </div>
-          </div>
+          )}
         </TabsContent>
 
-        {/* Tiers Tab */}
         <TabsContent value="tiers">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
             {tiers.map((tier) => (
               <Card key={tier.name} className="overflow-hidden">
                 <div className={`${tier.color} h-2`} />
                 <CardContent className="p-6">
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="flex items-center gap-3">
-                      <div className={`w-10 h-10 rounded-full ${tier.color} flex items-center justify-center`}>
-                        <Star size={18} className="text-white" />
-                      </div>
-                      <div>
-                        <h3 className="text-lg font-bold text-foreground">{tier.name}</h3>
-                        <p className="text-xs text-muted-foreground">{tier.minMiles.toLocaleString()} – {tier.maxMiles.toLocaleString()} miles</p>
-                      </div>
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className={`w-10 h-10 rounded-full ${tier.color} flex items-center justify-center`}>
+                      <Star size={18} className="text-white" />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-bold text-foreground">{tier.name}</h3>
+                      <p className="text-xs text-muted-foreground">{tier.minMiles.toLocaleString()} – {tier.maxMiles.toLocaleString()} miles</p>
                     </div>
                   </div>
                   <div className="mb-4">
@@ -129,24 +149,21 @@ const MizMilesPage = () => {
                     </div>
                     <Progress value={60} className="h-2" />
                   </div>
-                  <div>
-                    <p className="text-xs font-semibold text-foreground mb-2">Benefits:</p>
-                    <ul className="space-y-1">
-                      {tier.benefits.map((b, i) => (
-                        <li key={i} className="text-xs text-muted-foreground flex items-center gap-2">
-                          <span className="w-1.5 h-1.5 rounded-full bg-primary shrink-0" />
-                          {b}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
+                  <p className="text-xs font-semibold text-foreground mb-2">Benefits:</p>
+                  <ul className="space-y-1">
+                    {tier.benefits.map((b, i) => (
+                      <li key={i} className="text-xs text-muted-foreground flex items-center gap-2">
+                        <span className="w-1.5 h-1.5 rounded-full bg-primary shrink-0" />
+                        {b}
+                      </li>
+                    ))}
+                  </ul>
                 </CardContent>
               </Card>
             ))}
           </div>
         </TabsContent>
 
-        {/* Redemption Tab */}
         <TabsContent value="redemption">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
             {redemptionOptions.map((opt) => (
@@ -157,14 +174,11 @@ const MizMilesPage = () => {
                       <Gift size={18} className="text-accent-foreground" />
                     </div>
                     <div>
-                      <h4 className="text-sm font-bold text-foreground">{opt.name}</h4>
-                      <p className="text-xs text-primary font-semibold">{opt.miles.toLocaleString()} miles</p>
+                      <p className="text-sm font-semibold text-foreground">{opt.name}</p>
+                      <Badge variant="outline" className="text-xs mt-1">{opt.miles.toLocaleString()} miles</Badge>
                     </div>
                   </div>
-                  <p className="text-xs text-muted-foreground mb-4">{opt.description}</p>
-                  <Button variant="outline" size="sm" className="w-full rounded-full text-xs">
-                    Edit Option
-                  </Button>
+                  <p className="text-xs text-muted-foreground">{opt.description}</p>
                 </CardContent>
               </Card>
             ))}

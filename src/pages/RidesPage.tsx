@@ -1,55 +1,81 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Car, MapPin, Clock, DollarSign, ChevronLeft, ChevronRight, Eye } from "lucide-react";
 import DashboardHeader from "@/components/DashboardHeader";
 import StatsCard from "@/components/StatsCard";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-
-const activeRides = [
-  { id: "RD-001", rider: "Daniel Asante", driver: "Kwame Mensah", pickup: "Tema Station", dropoff: "Kumasi Adum", fare: "Gh₵125.00", status: "In Progress" },
-  { id: "RD-002", rider: "Samuela Kate", driver: "Ama Serwaa", pickup: "Accra Mall", dropoff: "Legon", fare: "Gh₵35.00", status: "In Progress" },
-  { id: "RD-003", rider: "John Dokubo", driver: "Nana Agyei", pickup: "East Legon", dropoff: "Airport", fare: "Gh₵45.00", status: "Driver Assigned" },
-];
-
-const ridesHistory = [
-  { id: "RD-100", rider: "Ibiso Okujagu", driver: "Kofi Asante", pickup: "Osu", dropoff: "Cantonments", date: "Sep 30, 2030", fare: "Gh₵28.00", status: "Completed" },
-  { id: "RD-101", rider: "Goinbo Ebizi", driver: "Efua Mensah", pickup: "Tema", dropoff: "Accra Central", date: "Sep 29, 2030", fare: "Gh₵55.00", status: "Completed" },
-  { id: "RD-102", rider: "Aisha Ibrahim", driver: "Yaw Boateng", pickup: "Madina", dropoff: "Circle", date: "Sep 29, 2030", fare: "Gh₵22.00", status: "Cancelled" },
-  { id: "RD-103", rider: "Deborah Goinbo", driver: "Abena Osei", pickup: "Lapaz", dropoff: "Dansoman", date: "Sep 28, 2030", fare: "Gh₵18.00", status: "Completed" },
-  { id: "RD-104", rider: "Philip Olabode", driver: "Akua Darko", pickup: "Spintex", dropoff: "Teshie", date: "Sep 28, 2030", fare: "Gh₵30.00", status: "Completed" },
-  { id: "RD-105", rider: "David Oladipo", driver: "Kwame Mensah", pickup: "Achimota", dropoff: "Legon", date: "Sep 27, 2030", fare: "Gh₵25.00", status: "Refunded" },
-];
-
-const statusStyle = (status: string) => {
-  switch (status) {
-    case "In Progress": return "bg-primary/10 text-primary border-0";
-    case "Driver Assigned": return "bg-warning/10 text-warning border-0";
-    case "Completed": return "bg-success/10 text-success border-0";
-    case "Cancelled": return "bg-destructive/10 text-destructive border-0";
-    case "Refunded": return "bg-muted text-muted-foreground border-0";
-    default: return "";
-  }
-};
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
+import { ErrorAlert } from "@/components/ui/error-alert";
+import { EmptyState } from "@/components/ui/empty-state";
+import { StatusBadge } from "@/components/ui/status-badge";
+import api from "@/lib/api";
+import type { TripSummary, DashboardStats } from "@/types/api.types";
 
 const RidesPage = () => {
-  const [currentPage, setCurrentPage] = useState(1);
+  const [stats, setStats] = useState<DashboardStats | null>(null);
+  const [activeRides, setActiveRides] = useState<TripSummary[]>([]);
+  const [ridesHistory, setRidesHistory] = useState<TripSummary[]>([]);
+  const [loadingActive, setLoadingActive] = useState(true);
+  const [loadingHistory, setLoadingHistory] = useState(true);
+  const [errorActive, setErrorActive] = useState("");
+  const [errorHistory, setErrorHistory] = useState("");
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [statusFilter, setStatusFilter] = useState("");
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const fetchActive = async () => {
+    try {
+      const data = await api.get("/admin/rides/trips/active");
+      setActiveRides(Array.isArray(data) ? data : (data?.data ?? []));
+    } catch (err: any) {
+      setErrorActive(err.message);
+    } finally {
+      setLoadingActive(false);
+    }
+  };
+
+  const fetchHistory = async () => {
+    setLoadingHistory(true);
+    setErrorHistory("");
+    try {
+      const params = new URLSearchParams({
+        page: String(page),
+        limit: "20",
+        ...(statusFilter && { status: statusFilter }),
+      });
+      const [histData, statsData] = await Promise.all([
+        api.get(`/admin/rides/trips?${params}`),
+        stats ? Promise.resolve(null) : api.get("/admin/stats"),
+      ]);
+      setRidesHistory(histData.data ?? histData);
+      setTotalPages(histData.meta?.totalPages ?? 1);
+      if (statsData) setStats(statsData);
+    } catch (err: any) {
+      setErrorHistory(err.message);
+    } finally {
+      setLoadingHistory(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchActive();
+    intervalRef.current = setInterval(fetchActive, 30000);
+    return () => { if (intervalRef.current) clearInterval(intervalRef.current); };
+  }, []);
+
+  useEffect(() => { fetchHistory(); }, [page, statusFilter]);
 
   return (
     <div>
       <DashboardHeader title="Ride Management" subtitle="Dashboard > Rides" />
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-        <StatsCard icon={Car} label="Total Rides" value={8450} />
-        <StatsCard icon={MapPin} label="Active Rides" value={3} />
-        <StatsCard icon={Clock} label="Avg. Duration" value="25 min" />
-        <StatsCard icon={DollarSign} label="Revenue Today" value="Gh₵12,500" />
+        <StatsCard icon={Car} label="Active Trips" value={stats?.activeTripsCount?.toLocaleString() ?? String(activeRides.length)} />
+        <StatsCard icon={MapPin} label="Scheduled" value={stats?.scheduledTripsCount?.toLocaleString() ?? "—"} />
+        <StatsCard icon={Clock} label="Open Tickets" value={stats?.totalOpenSupportTickets?.toLocaleString() ?? "—"} />
+        <StatsCard icon={DollarSign} label="Revenue Today" value={stats ? `GHS ${stats.revenueToday?.toLocaleString()}` : "—"} />
       </div>
 
       <Tabs defaultValue="active" className="space-y-4">
@@ -69,116 +95,106 @@ const RidesPage = () => {
         </TabsList>
 
         <TabsContent value="active">
-          <div className="bg-card rounded-xl border border-border overflow-hidden">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-border">
-                  <th className="text-left text-sm font-semibold text-foreground px-6 py-3">Ride ID</th>
-                  <th className="text-left text-sm font-semibold text-foreground px-6 py-3">Rider</th>
-                  <th className="text-left text-sm font-semibold text-foreground px-6 py-3">Driver</th>
-                  <th className="text-left text-sm font-semibold text-foreground px-6 py-3">Pickup</th>
-                  <th className="text-left text-sm font-semibold text-foreground px-6 py-3">Drop-off</th>
-                  <th className="text-left text-sm font-semibold text-foreground px-6 py-3">Fare</th>
-                  <th className="text-left text-sm font-semibold text-foreground px-6 py-3">Status</th>
-                  <th className="text-left text-sm font-semibold text-foreground px-6 py-3">Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                {activeRides.map((r) => (
-                  <tr key={r.id} className="border-b border-border hover:bg-muted/50 transition-colors">
-                    <td className="px-6 py-3 text-sm font-medium text-primary">{r.id}</td>
-                    <td className="px-6 py-3 text-sm text-foreground">{r.rider}</td>
-                    <td className="px-6 py-3 text-sm text-foreground">{r.driver}</td>
-                    <td className="px-6 py-3 text-sm text-muted-foreground">{r.pickup}</td>
-                    <td className="px-6 py-3 text-sm text-muted-foreground">{r.dropoff}</td>
-                    <td className="px-6 py-3 text-sm font-medium text-foreground">{r.fare}</td>
-                    <td className="px-6 py-3"><Badge className={statusStyle(r.status)}>{r.status}</Badge></td>
-                    <td className="px-6 py-3">
-                      <button className="text-primary text-sm font-medium hover:underline">Track</button>
-                    </td>
+          {loadingActive ? (
+            <LoadingSpinner message="Loading active trips..." />
+          ) : errorActive ? (
+            <ErrorAlert message={errorActive} onRetry={fetchActive} />
+          ) : activeRides.length === 0 ? (
+            <EmptyState title="No active trips" description="All clear — no rides in progress right now." />
+          ) : (
+            <div className="bg-card rounded-xl border border-border overflow-hidden">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b border-border">
+                    <th className="text-left text-sm font-semibold text-foreground px-6 py-3">Trip ID</th>
+                    <th className="text-left text-sm font-semibold text-foreground px-6 py-3">Driver</th>
+                    <th className="text-left text-sm font-semibold text-foreground px-6 py-3">Route</th>
+                    <th className="text-left text-sm font-semibold text-foreground px-6 py-3">Departure</th>
+                    <th className="text-left text-sm font-semibold text-foreground px-6 py-3">Fare</th>
+                    <th className="text-left text-sm font-semibold text-foreground px-6 py-3">Seats</th>
+                    <th className="text-left text-sm font-semibold text-foreground px-6 py-3">Status</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody>
+                  {activeRides.map((r) => (
+                    <tr key={r.id} className="border-b border-border hover:bg-muted/50 transition-colors">
+                      <td className="px-6 py-3 text-xs font-mono text-primary">{r.id.slice(0, 8)}…</td>
+                      <td className="px-6 py-3 text-sm text-foreground">{r.driver?.firstName} {r.driver?.lastName}</td>
+                      <td className="px-6 py-3 text-sm text-muted-foreground">{r.originCity} → {r.destinationCity}</td>
+                      <td className="px-6 py-3 text-sm text-foreground">{new Date(r.departureDate).toLocaleString()}</td>
+                      <td className="px-6 py-3 text-sm font-medium text-foreground">GHS {r.pricePerSeat}</td>
+                      <td className="px-6 py-3 text-sm text-foreground">{r.confirmedBookingCount}/{r.totalSeats}</td>
+                      <td className="px-6 py-3"><StatusBadge status={r.status} /></td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </TabsContent>
 
         <TabsContent value="history">
           <div className="flex items-center gap-4 mb-4">
-            <span className="text-sm text-muted-foreground">Showing</span>
-            <Select defaultValue="10">
-              <SelectTrigger className="w-20 h-9 rounded-full bg-primary text-primary-foreground border-0 text-sm font-semibold">
-                <SelectValue />
+            <Select value={statusFilter} onValueChange={(v) => { setStatusFilter(v === "ALL" ? "" : v); setPage(1); }}>
+              <SelectTrigger className="w-44 h-9 rounded-lg border-border text-sm">
+                <SelectValue placeholder="All Statuses" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="10">10</SelectItem>
-                <SelectItem value="25">25</SelectItem>
-              </SelectContent>
-            </Select>
-            <Select>
-              <SelectTrigger className="w-36 h-9 rounded-lg border-border text-sm">
-                <SelectValue placeholder="Status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All</SelectItem>
-                <SelectItem value="completed">Completed</SelectItem>
-                <SelectItem value="cancelled">Cancelled</SelectItem>
-                <SelectItem value="refunded">Refunded</SelectItem>
+                <SelectItem value="ALL">All</SelectItem>
+                <SelectItem value="COMPLETED">Completed</SelectItem>
+                <SelectItem value="CANCELLED">Cancelled</SelectItem>
+                <SelectItem value="SCHEDULED">Scheduled</SelectItem>
               </SelectContent>
             </Select>
           </div>
 
-          <div className="bg-card rounded-xl border border-border overflow-hidden">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-border">
-                  <th className="text-left text-sm font-semibold text-foreground px-6 py-3">Ride ID</th>
-                  <th className="text-left text-sm font-semibold text-foreground px-6 py-3">Rider</th>
-                  <th className="text-left text-sm font-semibold text-foreground px-6 py-3">Driver</th>
-                  <th className="text-left text-sm font-semibold text-foreground px-6 py-3">Route</th>
-                  <th className="text-left text-sm font-semibold text-foreground px-6 py-3">Date</th>
-                  <th className="text-left text-sm font-semibold text-foreground px-6 py-3">Fare</th>
-                  <th className="text-left text-sm font-semibold text-foreground px-6 py-3">Status</th>
-                  <th className="text-left text-sm font-semibold text-foreground px-6 py-3">Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                {ridesHistory.map((r) => (
-                  <tr key={r.id} className="border-b border-border hover:bg-muted/50 transition-colors">
-                    <td className="px-6 py-3 text-sm font-medium text-primary">{r.id}</td>
-                    <td className="px-6 py-3 text-sm text-foreground">{r.rider}</td>
-                    <td className="px-6 py-3 text-sm text-foreground">{r.driver}</td>
-                    <td className="px-6 py-3 text-sm text-muted-foreground">{r.pickup} → {r.dropoff}</td>
-                    <td className="px-6 py-3 text-sm text-foreground">{r.date}</td>
-                    <td className="px-6 py-3 text-sm font-medium text-foreground">{r.fare}</td>
-                    <td className="px-6 py-3"><Badge className={statusStyle(r.status)}>{r.status}</Badge></td>
-                    <td className="px-6 py-3">
-                      <button className="text-primary hover:text-primary/80"><Eye size={18} /></button>
-                    </td>
+          {loadingHistory ? (
+            <LoadingSpinner message="Loading ride history..." />
+          ) : errorHistory ? (
+            <ErrorAlert message={errorHistory} onRetry={fetchHistory} />
+          ) : ridesHistory.length === 0 ? (
+            <EmptyState title="No rides found" description="Try changing the status filter." />
+          ) : (
+            <div className="bg-card rounded-xl border border-border overflow-hidden">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b border-border">
+                    <th className="text-left text-sm font-semibold text-foreground px-6 py-3">Trip ID</th>
+                    <th className="text-left text-sm font-semibold text-foreground px-6 py-3">Driver</th>
+                    <th className="text-left text-sm font-semibold text-foreground px-6 py-3">Route</th>
+                    <th className="text-left text-sm font-semibold text-foreground px-6 py-3">Date</th>
+                    <th className="text-left text-sm font-semibold text-foreground px-6 py-3">Fare</th>
+                    <th className="text-left text-sm font-semibold text-foreground px-6 py-3">Status</th>
+                    <th className="text-left text-sm font-semibold text-foreground px-6 py-3">Action</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {ridesHistory.map((r) => (
+                    <tr key={r.id} className="border-b border-border hover:bg-muted/50 transition-colors">
+                      <td className="px-6 py-3 text-xs font-mono text-primary">{r.id.slice(0, 8)}…</td>
+                      <td className="px-6 py-3 text-sm text-foreground">{r.driver?.firstName} {r.driver?.lastName}</td>
+                      <td className="px-6 py-3 text-sm text-muted-foreground">{r.originCity} → {r.destinationCity}</td>
+                      <td className="px-6 py-3 text-sm text-foreground">{new Date(r.departureDate).toLocaleDateString()}</td>
+                      <td className="px-6 py-3 text-sm font-medium text-foreground">GHS {r.pricePerSeat}</td>
+                      <td className="px-6 py-3"><StatusBadge status={r.status} /></td>
+                      <td className="px-6 py-3">
+                        <button className="text-primary hover:text-primary/80"><Eye size={18} /></button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
 
-            <div className="px-6 py-4 flex items-center justify-between border-t border-border">
-              <p className="text-sm text-muted-foreground">Showing 1 to 6 out of 60 records</p>
-              <div className="flex items-center gap-2">
-                <button className="p-1 text-muted-foreground hover:text-foreground"><ChevronLeft size={18} /></button>
-                {[1, 2, 3].map((page) => (
-                  <button
-                    key={page}
-                    onClick={() => setCurrentPage(page)}
-                    className={`w-8 h-8 rounded-full text-sm font-medium transition-colors ${
-                      currentPage === page ? "bg-primary text-primary-foreground" : "text-primary hover:bg-primary/10"
-                    }`}
-                  >
-                    {page}
-                  </button>
-                ))}
-                <button className="p-1 text-muted-foreground hover:text-foreground"><ChevronRight size={18} /></button>
+              <div className="px-6 py-4 flex items-center justify-between border-t border-border">
+                <p className="text-sm text-muted-foreground">Page {page} of {totalPages}</p>
+                <div className="flex items-center gap-2">
+                  <button disabled={page <= 1} onClick={() => setPage((p) => p - 1)} className="p-1 text-muted-foreground hover:text-foreground disabled:opacity-40"><ChevronLeft size={18} /></button>
+                  <span className="w-8 h-8 rounded-full text-sm font-medium bg-primary text-primary-foreground flex items-center justify-center">{page}</span>
+                  <button disabled={page >= totalPages} onClick={() => setPage((p) => p + 1)} className="p-1 text-muted-foreground hover:text-foreground disabled:opacity-40"><ChevronRight size={18} /></button>
+                </div>
               </div>
             </div>
-          </div>
+          )}
         </TabsContent>
       </Tabs>
     </div>

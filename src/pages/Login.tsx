@@ -1,18 +1,43 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { Loader2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { LoginIllustration } from "@/components/LoginIllustration";
 import mizrmoLogo from "@/assets/mizrmo_logo.png";
+import api from "@/lib/api";
 
 const Login = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  const handleSignIn = (e: React.FormEvent) => {
+  const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
-    navigate("/dashboard");
+    setError("");
+    setLoading(true);
+
+    try {
+      const data = await api.post("/auth/login", {
+        emailOrPhone: email,
+        password,
+      });
+
+      const user = data.user ?? data;
+      if (!user.roles?.includes("ADMIN")) {
+        setError("This account does not have admin access");
+        return;
+      }
+
+      localStorage.setItem("admin_token", data.accessToken ?? "authenticated");
+      navigate("/dashboard");
+    } catch (err: any) {
+      setError(err.message ?? "Invalid credentials");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -40,6 +65,7 @@ const Login = () => {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="h-12 rounded-full px-5 bg-secondary border-0"
+              required
             />
             <Input
               type="password"
@@ -47,12 +73,17 @@ const Login = () => {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               className="h-12 rounded-full px-5 bg-secondary border-0"
+              required
             />
+            {error && (
+              <p className="text-sm text-destructive text-center">{error}</p>
+            )}
             <Button
               type="submit"
+              disabled={loading}
               className="w-full h-12 rounded-full text-base font-semibold bg-primary text-primary-foreground hover:bg-primary/90"
             >
-              Sign In
+              {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : "Sign In"}
             </Button>
           </form>
         </div>
