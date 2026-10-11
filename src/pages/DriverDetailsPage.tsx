@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, CheckCircle, XCircle, User, Car, FileText, Loader2 } from "lucide-react";
+import { ArrowLeft, CheckCircle, XCircle, User, Car, FileText, Loader2, Trash2 } from "lucide-react";
 import DashboardHeader from "@/components/DashboardHeader";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -9,6 +9,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Textarea } from "@/components/ui/textarea";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
+import { DeleteAccountDialog } from "@/components/DeleteAccountDialog";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { ErrorAlert } from "@/components/ui/error-alert";
 import { StatusBadge } from "@/components/ui/status-badge";
@@ -28,6 +29,7 @@ const DriverDetailsPage = () => {
   const [approveOpen, setApproveOpen] = useState(false);
   const [rejectOpen, setRejectOpen] = useState(false);
   const [rejectReason, setRejectReason] = useState("");
+  const [deleteOpen, setDeleteOpen] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -110,6 +112,14 @@ const DriverDetailsPage = () => {
         </div>
         <div className="flex items-center gap-3">
           <StatusBadge status={driver.approvalStatus} />
+          <Button
+            variant="outline"
+            onClick={() => setDeleteOpen(true)}
+            className="gap-2 rounded-full text-destructive border-destructive/40"
+            size="sm"
+          >
+            <Trash2 size={15} /> Delete account
+          </Button>
           {isPending && (
             <>
               <Button
@@ -244,6 +254,18 @@ const DriverDetailsPage = () => {
           )}
         </TabsContent>
       </Tabs>
+
+      <DeleteAccountDialog
+        open={deleteOpen}
+        userId={driver.userId}
+        name={name}
+        onClose={() => setDeleteOpen(false)}
+        onDeleted={() => {
+          setDeleteOpen(false);
+          toast.success("Account deleted");
+          navigate("/drivers");
+        }}
+      />
 
       <ConfirmDialog
         open={approveOpen}
