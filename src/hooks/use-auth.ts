@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import api from '@/lib/api';
+import api, { clearSession } from '@/lib/api';
 import type { AdminUser } from '@/types/api.types';
 
 interface AuthState {
@@ -26,14 +26,14 @@ export function useAuth() {
       .then((data: any) => {
         const user: AdminUser = data.user ?? data;
         if (!user.roles?.includes('ADMIN')) {
-          localStorage.removeItem('admin_token');
+          clearSession();
           setState({ user: null, loading: false, error: 'Not an admin account' });
           return;
         }
         setState({ user, loading: false, error: null });
       })
       .catch(() => {
-        localStorage.removeItem('admin_token');
+        clearSession();
         setState({ user: null, loading: false, error: null });
       });
   }, []);

@@ -75,7 +75,7 @@ const RidesPage = () => {
         <StatsCard icon={Car} label="Active Trips" value={stats?.activeTripsCount?.toLocaleString() ?? String(activeRides.length)} />
         <StatsCard icon={MapPin} label="Scheduled" value={stats?.scheduledTripsCount?.toLocaleString() ?? "—"} />
         <StatsCard icon={Clock} label="Open Tickets" value={stats?.totalOpenSupportTickets?.toLocaleString() ?? "—"} />
-        <StatsCard icon={DollarSign} label="Revenue Today" value={stats ? `GHS ${stats.revenueToday?.toLocaleString()}` : "—"} />
+        <StatsCard icon={DollarSign} label="Revenue Today" value={stats?.revenueToday != null ? `GHS ${stats.revenueToday.toLocaleString()}` : "—"} />
       </div>
 
       <Tabs defaultValue="active" className="space-y-4">

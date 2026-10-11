@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { clearSession } from "@/lib/api";
 import { useLocation, useNavigate } from "react-router-dom";
 import {
   LayoutDashboard,
@@ -43,6 +44,12 @@ const DashboardSidebar = () => {
     setMobileOpen(false);
   };
 
+  const handleLogout = () => {
+    clearSession();
+    setMobileOpen(false);
+    navigate("/", { replace: true });
+  };
+
   const sidebarContent = (
     <>
       <div className="px-5 py-5">
@@ -73,7 +80,7 @@ const DashboardSidebar = () => {
 
       <div className="px-3 pb-5">
         <button
-          onClick={() => handleNav("/")}
+          onClick={handleLogout}
           className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-destructive hover:bg-sidebar-hover transition-colors"
         >
           <LogOut size={18} className="shrink-0" />

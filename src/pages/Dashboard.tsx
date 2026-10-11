@@ -33,16 +33,29 @@ export default function Dashboard() {
     setLoading(true);
     setError("");
     try {
-      const [statsData, revenueData, tripsData, driversData] = await Promise.all([
+      // Each card loads independently so one failing endpoint doesn't blank the rest.
+      const results = await Promise.allSettled([
         api.get("/admin/stats"),
         api.get(`/admin/financials/revenue?from=${thirtyDaysAgo}&to=${today}&groupBy=day`),
         api.get("/admin/rides/trips/active?limit=5"),
         api.get("/admin/drivers/pending"),
       ]);
-      setStats(statsData);
-      setRevenue(Array.isArray(revenueData) ? revenueData : (revenueData?.data ?? []));
-      setActiveTrips(Array.isArray(tripsData) ? tripsData.slice(0, 5) : (tripsData?.data?.slice(0, 5) ?? []));
-      setPendingDrivers(Array.isArray(driversData) ? driversData.slice(0, 5) : (driversData?.data?.slice(0, 5) ?? []));
+      const [statsRes, revenueRes, tripsRes, driversRes] = results;
+      if (statsRes.status === "fulfilled") setStats(statsRes.value);
+      if (revenueRes.status === "fulfilled") {
+        const revenueData = revenueRes.value;
+        setRevenue(Array.isArray(revenueData) ? revenueData : (revenueData?.data ?? []));
+      }
+      if (tripsRes.status === "fulfilled") {
+        const tripsData = tripsRes.value;
+        setActiveTrips(Array.isArray(tripsData) ? tripsData.slice(0, 5) : (tripsData?.data?.slice(0, 5) ?? []));
+      }
+      if (driversRes.status === "fulfilled") {
+        const driversData = driversRes.value;
+        setPendingDrivers(Array.isArray(driversData) ? driversData.slice(0, 5) : (driversData?.data?.slice(0, 5) ?? []));
+      }
+      const failed = results.find((r): r is PromiseRejectedResult => r.status === "rejected");
+      if (failed) setError(failed.reason?.message ?? "Some dashboard data failed to load");
     } catch (err: any) {
       setError(err.message);
     } finally {

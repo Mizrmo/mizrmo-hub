@@ -201,7 +201,7 @@ export interface PlatformBalance {
   paystack: {
     available: number;
     pending: number;
-  };
+  } | null;
 }
 
 export interface PayoutRequest {
