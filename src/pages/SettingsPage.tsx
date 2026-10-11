@@ -19,11 +19,41 @@ const SettingsPage = () => {
   const [changedKeys, setChangedKeys] = useState<Set<string>>(new Set());
 
   const [profile, setProfile] = useState({
-    name: "Admin User",
-    email: "admin@mizrmo.com",
-    phone: "+233 24 000 0000",
-    role: "Super Admin",
+    firstName: "",
+    lastName: "",
+    email: "",
+    phoneNumber: "",
+    role: "Admin",
   });
+  const [profileLoading, setProfileLoading] = useState(true);
+
+  useEffect(() => {
+    api
+      .get("/auth/me")
+      .then((data: any) => {
+        const u = data.user ?? data;
+        setProfile({
+          firstName: u.firstName ?? "",
+          lastName: u.lastName ?? "",
+          email: u.email ?? "",
+          phoneNumber: u.phoneNumber ?? "",
+          role: "Admin",
+        });
+      })
+      .catch(() => {})
+      .finally(() => setProfileLoading(false));
+  }, []);
+
+  const handleSaveProfile = () =>
+    execute(
+      () =>
+        api.patch("/auth/me", {
+          firstName: profile.firstName,
+          lastName: profile.lastName,
+          phoneNumber: profile.phoneNumber,
+        }),
+      { successMessage: "Profile saved" },
+    );
 
   const [notifSettings, setNotifSettings] = useState({
     emailAlerts: true,
@@ -93,25 +123,29 @@ const SettingsPage = () => {
           <div className="bg-card rounded-xl border border-border p-6 max-w-2xl">
             <div className="flex items-center gap-4 mb-6">
               <Avatar className="h-16 w-16">
-                <AvatarFallback className="bg-primary text-primary-foreground text-xl font-bold">A</AvatarFallback>
+                <AvatarFallback className="bg-primary text-primary-foreground text-xl font-bold">{(profile.firstName[0] ?? "A").toUpperCase()}</AvatarFallback>
               </Avatar>
               <div>
-                <h3 className="font-semibold text-foreground">{profile.name}</h3>
+                <h3 className="font-semibold text-foreground">{profileLoading ? "Loading…" : `${profile.firstName} ${profile.lastName}`.trim() || "Admin"}</h3>
                 <p className="text-sm text-muted-foreground">{profile.role}</p>
               </div>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <Label>Full Name</Label>
-                <Input value={profile.name} onChange={(e) => setProfile({ ...profile, name: e.target.value })} className="mt-1" />
+                <Label>First Name</Label>
+                <Input value={profile.firstName} onChange={(e) => setProfile({ ...profile, firstName: e.target.value })} className="mt-1" />
+              </div>
+              <div>
+                <Label>Last Name</Label>
+                <Input value={profile.lastName} onChange={(e) => setProfile({ ...profile, lastName: e.target.value })} className="mt-1" />
               </div>
               <div>
                 <Label>Email</Label>
-                <Input value={profile.email} onChange={(e) => setProfile({ ...profile, email: e.target.value })} className="mt-1" />
+                <Input value={profile.email} disabled className="mt-1 bg-muted" />
               </div>
               <div>
                 <Label>Phone</Label>
-                <Input value={profile.phone} onChange={(e) => setProfile({ ...profile, phone: e.target.value })} className="mt-1" />
+                <Input value={profile.phoneNumber} onChange={(e) => setProfile({ ...profile, phoneNumber: e.target.value })} className="mt-1" />
               </div>
               <div>
                 <Label>Role</Label>
@@ -119,7 +153,7 @@ const SettingsPage = () => {
               </div>
             </div>
             <div className="mt-6 flex gap-3">
-              <Button onClick={() => toast({ title: "Profile saved" })}>Save Changes</Button>
+              <Button onClick={handleSaveProfile} disabled={saving}>{saving ? "Saving…" : "Save Changes"}</Button>
               <Button variant="outline">Change Password</Button>
             </div>
           </div>

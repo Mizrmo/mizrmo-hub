@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Loader2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -13,6 +13,12 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  useEffect(() => {
+    if (localStorage.getItem("admin_token")) {
+      navigate("/dashboard", { replace: true });
+    }
+  }, [navigate]);
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -32,6 +38,7 @@ const Login = () => {
       }
 
       localStorage.setItem("admin_token", data.accessToken ?? "authenticated");
+      if (data.refreshToken) localStorage.setItem("admin_refresh_token", data.refreshToken);
       navigate("/dashboard");
     } catch (err: any) {
       setError(err.message ?? "Invalid credentials");

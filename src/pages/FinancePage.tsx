@@ -119,7 +119,7 @@ const FinancePage = () => {
                     <div>
                       <p className="text-[10px] text-muted-foreground">Available</p>
                       <p className="text-sm font-semibold text-foreground">
-                        GHS {((balance?.paystack?.available ?? 0) / 100).toLocaleString()}
+                        GHS {(balance?.paystack?.available ?? 0).toLocaleString()}
                       </p>
                     </div>
                   </div>
@@ -128,7 +128,7 @@ const FinancePage = () => {
                     <div>
                       <p className="text-[10px] text-muted-foreground">Pending</p>
                       <p className="text-sm font-semibold text-foreground">
-                        GHS {((balance?.paystack?.pending ?? 0) / 100).toLocaleString()}
+                        GHS {(balance?.paystack?.pending ?? 0).toLocaleString()}
                       </p>
                     </div>
                   </div>

@@ -17,8 +17,6 @@ interface FareForm {
   PLATFORM_COMMISSION_PERCENTAGE: string;
   DRIVER_PAYOUT_PERCENTAGE: string;
   ROAD_DISTANCE_FACTOR: string;
-  MINIMUM_DISTANCE_KM: string;
-  WAIT_TIME_COST_PER_MIN: string;
   [key: string]: string;
 }
 
@@ -30,8 +28,6 @@ const PricingPage = () => {
     PLATFORM_COMMISSION_PERCENTAGE: "",
     DRIVER_PAYOUT_PERCENTAGE: "",
     ROAD_DISTANCE_FACTOR: "",
-    MINIMUM_DISTANCE_KM: "",
-    WAIT_TIME_COST_PER_MIN: "",
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -84,7 +80,7 @@ const PricingPage = () => {
 
   const displayFare = settings.BASE_RATE_PER_KM ? `GH₵${parseFloat(settings.BASE_RATE_PER_KM).toFixed(2)}` : "—";
   const displayKm = settings.BASE_RATE_PER_KM ? `GH₵${parseFloat(settings.BASE_RATE_PER_KM).toFixed(2)}` : "—";
-  const displayMin = settings.WAIT_TIME_COST_PER_MIN ? `GH₵${parseFloat(settings.WAIT_TIME_COST_PER_MIN).toFixed(2)}` : "—";
+  const displayMinFare = settings.MINIMUM_FARE ? `GH₵${parseFloat(settings.MINIMUM_FARE).toFixed(2)}` : "—";
   const displayCommission = settings.PLATFORM_COMMISSION_PERCENTAGE ? `${settings.PLATFORM_COMMISSION_PERCENTAGE}%` : "—";
   const displayPayout = settings.DRIVER_PAYOUT_PERCENTAGE ? `${settings.DRIVER_PAYOUT_PERCENTAGE}%` : "—";
 
@@ -116,8 +112,8 @@ const PricingPage = () => {
                   <p className="text-lg font-bold text-foreground">{displayKm}</p>
                 </div>
                 <div>
-                  <p className="text-xs text-muted-foreground">Wait Time / min</p>
-                  <p className="text-lg font-bold text-foreground">{displayMin}</p>
+                  <p className="text-xs text-muted-foreground">Minimum Fare</p>
+                  <p className="text-lg font-bold text-foreground">{displayMinFare}</p>
                 </div>
               </div>
             </div>
@@ -154,8 +150,7 @@ const PricingPage = () => {
                 <form onSubmit={handleSubmit}>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {[
-                      { key: "MINIMUM_DISTANCE_KM", label: "Minimum Estimated Distance (km)" },
-                      { key: "WAIT_TIME_COST_PER_MIN", label: "Wait Time Cost Per Min (GH₵)" },
+                      { key: "ROAD_DISTANCE_FACTOR", label: "Road Distance Factor (× straight-line km)" },
                       { key: "BASE_RATE_PER_KM", label: "Cost / km Distance (GH₵)" },
                       { key: "MINIMUM_FARE", label: "Minimum Fare (GH₵)" },
                       { key: "PLATFORM_COMMISSION_PERCENTAGE", label: "Platform Commission (%)" },

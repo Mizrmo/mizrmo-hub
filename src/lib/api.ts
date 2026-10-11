@@ -1,5 +1,7 @@
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000/api/v1';
 
+const REQUEST_TIMEOUT_MS = 20000;
+
 export interface ApiError {
   message: string;
   statusCode: number;
@@ -10,8 +12,42 @@ export function isApiError(error: unknown): error is ApiError {
   return typeof error === 'object' && error !== null && 'statusCode' in error;
 }
 
+export function clearSession() {
+  localStorage.removeItem('admin_token');
+  localStorage.removeItem('admin_refresh_token');
+}
+
+let refreshInFlight: Promise<boolean> | null = null;
+
+// Access tokens are short-lived; trade the refresh token for a new pair once
+// (shared across concurrent 401s) instead of logging the admin out.
+function refreshAccessToken(): Promise<boolean> {
+  const refreshToken = localStorage.getItem('admin_refresh_token');
+  if (!refreshToken) return Promise.resolve(false);
+  if (!refreshInFlight) {
+    refreshInFlight = fetch(`${API_BASE_URL}/auth/refresh`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ refreshToken }),
+    })
+      .then(async (res) => {
+        if (!res.ok) return false;
+        const data = await res.json();
+        if (!data.accessToken) return false;
+        localStorage.setItem('admin_token', data.accessToken);
+        if (data.refreshToken) localStorage.setItem('admin_refresh_token', data.refreshToken);
+        return true;
+      })
+      .catch(() => false)
+      .finally(() => {
+        refreshInFlight = null;
+      });
+  }
+  return refreshInFlight;
+}
+
 const api = {
-  async request(endpoint: string, options: RequestInit = {}) {
+  async request(endpoint: string, options: RequestInit = {}, isRetry = false): Promise<any> {
     const token = localStorage.getItem('admin_token');
     const headers: Record<string, string> = {
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
@@ -22,13 +58,32 @@ const api = {
       headers['Content-Type'] = 'application/json';
     }
 
-    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-      ...options,
-      headers,
-    });
+    // Never let a hung request leave a page spinning forever.
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+    let response: Response;
+    try {
+      response = await fetch(`${API_BASE_URL}${endpoint}`, {
+        ...options,
+        headers,
+        signal: options.signal ?? controller.signal,
+      });
+    } catch (err) {
+      if ((err as Error)?.name === 'AbortError') {
+        throw { message: 'Request timed out. Please try again.', statusCode: 408 } as ApiError;
+      }
+      throw err;
+    } finally {
+      clearTimeout(timer);
+    }
 
-    if (response.status === 401) {
-      localStorage.removeItem('admin_token');
+    // A 401 from login/refresh themselves (e.g. a wrong password) is a normal
+    // error to show, not an expired session.
+    if (response.status === 401 && endpoint !== '/auth/login' && endpoint !== '/auth/refresh') {
+      if (!isRetry && (await refreshAccessToken())) {
+        return this.request(endpoint, options, true);
+      }
+      clearSession();
       window.location.href = '/';
       throw { message: 'Session expired', statusCode: 401 } as ApiError;
     }
