@@ -13,6 +13,8 @@ import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { ErrorAlert } from "@/components/ui/error-alert";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
+import { DeleteAccountDialog } from "@/components/DeleteAccountDialog";
+import { toast } from "sonner";
 import api from "@/lib/api";
 import { useApi } from "@/hooks/use-api";
 import type { UserDetail } from "@/types/api.types";
@@ -26,6 +28,7 @@ const UserDetailPage = () => {
   const [error, setError] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [suspendOpen, setSuspendOpen] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
 
   const fetchUser = async () => {
     if (!id) return;
@@ -116,6 +119,11 @@ const UserDetailPage = () => {
                 ) : (
                   <Button size="sm" onClick={handleReactivate} disabled={actionLoading}>
                     Reactivate
+                  </Button>
+                )}
+                {!user.roles?.includes("ADMIN") && (
+                  <Button size="sm" variant="outline" className="text-destructive border-destructive/40" onClick={() => setDeleteOpen(true)} disabled={actionLoading}>
+                    Delete account
                   </Button>
                 )}
               </div>
@@ -221,6 +229,18 @@ const UserDetailPage = () => {
         isLoading={actionLoading}
         onConfirm={handleSuspend}
         onCancel={() => setSuspendOpen(false)}
+      />
+
+      <DeleteAccountDialog
+        open={deleteOpen}
+        userId={user.id}
+        name={`${user.firstName} ${user.lastName}`}
+        onClose={() => setDeleteOpen(false)}
+        onDeleted={() => {
+          setDeleteOpen(false);
+          toast.success("Account deleted");
+          navigate("/users");
+        }}
       />
     </div>
   );
